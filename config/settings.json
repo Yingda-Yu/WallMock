@@ -1,0 +1,32 @@
+{
+  "app": {
+    "name": "WallMock",
+    "version": "1.0.0",
+    "host": "127.0.0.1",
+    "port": 5876
+  },
+  "paths": {
+    "input_dir": "input",
+    "output_dir": "output",
+    "templates_dir": "templates",
+    "assets_dir": "assets",
+    "logs_dir": "logs"
+  },
+  "defaults": {
+    "template": "single_phone",
+    "background_color": "#F5F2EB",
+    "brand_name": "米草科技",
+    "default_time": "9:42",
+    "default_date": "1月13日 星期一",
+    "output_width": 2000,
+    "output_height": 2000,
+    "output_format": "JPEG",
+    "output_quality": 95,
+    "min_file_size_kb": 0
+  },
+  "watcher": {
+    "enabled": false,
+    "poll_interval": 2,
+    "stable_size_checks": 3
+  }
+}

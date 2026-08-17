@@ -1,0 +1,57 @@
+{
+  "id": "all_devices",
+  "name": "多设备组合",
+  "description": "显示器、笔记本、手机组合展示，主次分明",
+  "canvas_width": 1500,
+  "canvas_height": 2000,
+  "background_color": "#F5F2EB",
+  "devices": [
+    {
+      "id": "monitor1",
+      "type": "desktop_monitor",
+      "x": 0.5,
+      "y": 0.32,
+      "scale": 0.55,
+      "rotation": 0,
+      "z_index": 1,
+      "image_slot": 0,
+      "preferred_orientation": "landscape"
+    },
+    {
+      "id": "laptop1",
+      "type": "laptop",
+      "x": 0.22,
+      "y": 0.68,
+      "scale": 0.42,
+      "rotation": 0,
+      "z_index": 2,
+      "image_slot": 1,
+      "preferred_orientation": "landscape"
+    },
+    {
+      "id": "phone1",
+      "type": "dynamic_island_phone",
+      "x": 0.78,
+      "y": 0.65,
+      "scale": 0.35,
+      "rotation": 0,
+      "z_index": 3,
+      "image_slot": 2,
+      "preferred_orientation": "portrait"
+    }
+  ],
+  "brand_text": {
+    "enabled": true,
+    "x": 0.5,
+    "y": 0.92,
+    "brand_size": 42,
+    "subtitle_size": 20,
+    "default_subtitle": "ALL DEVICES WALLPAPER SET",
+    "align": "center"
+  },
+  "output": {
+    "formats": ["JPEG", "PNG", "WebP"],
+    "default_format": "JPEG",
+    "default_quality": 95
+  }
+}

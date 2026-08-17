@@ -1,0 +1,46 @@
+{
+  "id": "laptop_phone",
+  "name": "笔记本加手机",
+  "description": "笔记本和手机组合展示，横图放电脑，竖图放手机",
+  "canvas_width": 1500,
+  "canvas_height": 2000,
+  "background_color": "#F5F2EB",
+  "devices": [
+    {
+      "id": "laptop1",
+      "type": "laptop",
+      "x": 0.35,
+      "y": 0.42,
+      "scale": 0.7,
+      "rotation": 0,
+      "z_index": 1,
+      "image_slot": 0,
+      "preferred_orientation": "landscape"
+    },
+    {
+      "id": "phone1",
+      "type": "dynamic_island_phone",
+      "x": 0.82,
+      "y": 0.52,
+      "scale": 0.42,
+      "rotation": 0,
+      "z_index": 3,
+      "image_slot": 1,
+      "preferred_orientation": "portrait"
+    }
+  ],
+  "brand_text": {
+    "enabled": true,
+    "x": 0.5,
+    "y": 0.88,
+    "brand_size": 44,
+    "subtitle_size": 22,
+    "default_subtitle": "DESKTOP & PHONE WALLPAPER",
+    "align": "center"
+  },
+  "output": {
+    "formats": ["JPEG", "PNG", "WebP"],
+    "default_format": "JPEG",
+    "default_quality": 95
+  }
+}
