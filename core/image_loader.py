@@ -51,3 +51,45 @@ def image_to_base64_preview(img, max_size=800, quality=85):
     buf = io.BytesIO()
     preview.save(buf, format="JPEG", quality=quality)
     return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode("utf-8")
+
+
+def image_to_base64(img, max_size=None, quality=95, format="JPEG"):
+    import io
+    import base64
+
+    result = img.copy()
+    if max_size and (result.width > max_size or result.height > max_size):
+        result.thumbnail((max_size, max_size), Image.LANCZOS)
+    if result.mode == "RGBA":
+        result = result.convert("RGB")
+    buf = io.BytesIO()
+    fmt = format.upper()
+    if fmt == "JPEG":
+        result.save(buf, format="JPEG", quality=quality)
+        mime = "image/jpeg"
+    elif fmt == "PNG":
+        result.save(buf, format="PNG")
+        mime = "image/png"
+    elif fmt == "WEBP":
+        result.save(buf, format="WEBP", quality=quality)
+        mime = "image/webp"
+    else:
+        result.save(buf, format="JPEG", quality=quality)
+        mime = "image/jpeg"
+    return f"data:{mime};base64," + base64.b64encode(buf.getvalue()).decode("utf-8")
+
+
+def base64_to_image(base64_str):
+    import base64
+    import io
+
+    if "," in base64_str:
+        base64_str = base64_str.split(",", 1)[1]
+    img_data = base64.b64decode(base64_str)
+    img = Image.open(io.BytesIO(img_data))
+    img.load()
+    if img.mode not in ("RGB", "RGBA"):
+        img = img.convert("RGBA")
+    elif img.mode == "RGB":
+        img = img.convert("RGBA")
+    return img

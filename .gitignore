@@ -40,3 +40,5 @@ desktop.ini
 
 # Debug images
 debug_*.png
+
+.vercel

@@ -219,27 +219,36 @@ def _hex_to_rgba(hex_str):
 
 def _create_layered_background(width, height, base_color):
     canvas = Image.new("RGBA", (width, height), base_color)
-    
-    overlay_color = (base_color[0], base_color[1], base_color[2], 10)
-    overlay = Image.new("RGBA", (width, height), overlay_color)
-    
+
     overlay_size = int(min(width, height) * 0.8)
     overlay_x = (width - overlay_size) // 2
     overlay_y = (height - overlay_size) // 2
-    
-    gradient = Image.new("RGBA", (overlay_size, overlay_size), (0, 0, 0, 0))
-    for y in range(overlay_size):
-        for x in range(overlay_size):
-            dx = x - overlay_size // 2
-            dy = y - overlay_size // 2
-            dist = (dx * dx + dy * dy) ** 0.5
-            max_dist = overlay_size // 2
-            if dist < max_dist:
-                alpha = int(5 * (1 - dist / max_dist))
-                gradient.putpixel((x, y), (0, 0, 0, alpha))
-    
+
+    try:
+        import numpy as np
+        y_coords, x_coords = np.ogrid[:overlay_size, :overlay_size]
+        center = overlay_size // 2
+        dist = np.sqrt((x_coords - center) ** 2 + (y_coords - center) ** 2)
+        max_dist = center
+        alpha = np.clip(5 * (1 - dist / max_dist), 0, 255).astype(np.uint8)
+
+        gradient_array = np.zeros((overlay_size, overlay_size, 4), dtype=np.uint8)
+        gradient_array[:, :, 3] = alpha
+        gradient = Image.fromarray(gradient_array, "RGBA")
+    except ImportError:
+        gradient = Image.new("RGBA", (overlay_size, overlay_size), (0, 0, 0, 0))
+        for y in range(overlay_size):
+            for x in range(overlay_size):
+                dx = x - overlay_size // 2
+                dy = y - overlay_size // 2
+                dist = (dx * dx + dy * dy) ** 0.5
+                max_dist = overlay_size // 2
+                if dist < max_dist:
+                    alpha = int(5 * (1 - dist / max_dist))
+                    gradient.putpixel((x, y), (0, 0, 0, alpha))
+
     canvas.paste(gradient, (overlay_x, overlay_y), gradient)
-    
+
     return canvas
 
 
@@ -268,6 +277,7 @@ def _draw_device_label(canvas, text, center_x, center_y):
     draw = ImageDraw.Draw(canvas)
     
     font_candidates = [
+        str(BASE_DIR / "assets" / "fonts" / "NotoSansSC.ttf"),
         "C:/Windows/Fonts/msyh.ttc",
         "/System/Library/Fonts/PingFang.ttc",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",

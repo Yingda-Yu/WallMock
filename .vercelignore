@@ -1,0 +1,9 @@
+tests/
+logs/
+input/
+output/
+__pycache__/
+*.pyc
+start.bat
+web/
+app.py

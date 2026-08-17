@@ -1,8 +1,13 @@
 from PIL import Image, ImageDraw, ImageFont
 import os
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+BUNDLED_FONT = str(BASE_DIR / "assets" / "fonts" / "NotoSansSC.ttf")
 
 def get_available_font(size=40, bold=False):
     font_candidates = [
+        BUNDLED_FONT,
         "C:/Windows/Fonts/msyhbd.ttc",
         "C:/Windows/Fonts/msyh.ttc",
         "C:/Windows/Fonts/simhei.ttf",

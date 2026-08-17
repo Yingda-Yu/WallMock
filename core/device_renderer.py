@@ -9,18 +9,27 @@ from .image_loader import load_image
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEVICES_JSON = BASE_DIR / "assets" / "device_frames" / "devices.json"
+BUNDLED_FONT = str(BASE_DIR / "assets" / "fonts" / "NotoSansSC.ttf")
 
-LOG_DIR = BASE_DIR / "logs"
-LOG_DIR.mkdir(exist_ok=True)
+DEBUG = os.environ.get('WALLMOCK_DEBUG', '0') == '1'
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler(LOG_DIR / 'device_renderer.log', encoding='utf-8'),
-        logging.StreamHandler()
-    ]
-)
+if DEBUG:
+    LOG_DIR = BASE_DIR / "logs"
+    LOG_DIR.mkdir(exist_ok=True)
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(LOG_DIR / 'device_renderer.log', encoding='utf-8'),
+            logging.StreamHandler()
+        ]
+    )
+else:
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[logging.StreamHandler()]
+    )
 logger = logging.getLogger('device_renderer')
 
 _debug_counter = 0
@@ -30,6 +39,10 @@ def _get_debug_counter():
     _debug_counter += 1
     return _debug_counter
 
+def _debug_save(img, counter, step, name):
+    if DEBUG:
+        img.save(LOG_DIR / f"debug_{counter}_{step:02d}_{name}.png")
+
 
 def load_device_configs():
     with open(DEVICES_JSON, "r", encoding="utf-8") as f:
@@ -38,6 +51,7 @@ def load_device_configs():
 
 def get_available_font(size=40, bold=False):
     font_candidates = [
+        BUNDLED_FONT,
         "C:/Windows/Fonts/msyh.ttc",
         "C:/Windows/Fonts/msyhbd.ttc",
         "C:/Windows/Fonts/simhei.ttf",
@@ -88,10 +102,10 @@ def render_device(wallpaper_img, device_type, scale=1.0, fit_mode="cover", offse
     logger.info(f"设备框尺寸: {frame_img.size}")
 
     debug_step = 1
-    frame_img.convert("RGBA").save(LOG_DIR / f"debug_{counter}_{debug_step:02d}_frame.png")
+    _debug_save(frame_img.convert("RGBA"), counter, debug_step, "frame")
     debug_step += 1
 
-    wallpaper_img.save(LOG_DIR / f"debug_{counter}_{debug_step:02d}_loaded.png")
+    _debug_save(wallpaper_img, counter, debug_step, "loaded")
     debug_step += 1
 
     if scale != 1.0:
@@ -104,35 +118,35 @@ def render_device(wallpaper_img, device_type, scale=1.0, fit_mode="cover", offse
 
     fitted_wp = fit_wallpaper(wallpaper_img, sw, sh, fit_mode, offset_x, offset_y, zoom)
     logger.info(f"fit_wallpaper 后尺寸: {fitted_wp.size}")
-    fitted_wp.save(LOG_DIR / f"debug_{counter}_{debug_step:02d}_fitted.png")
+    _debug_save(fitted_wp, counter, debug_step, "fitted")
     debug_step += 1
 
     fitted_wp = apply_rounded_corners(fitted_wp, corner_r)
     logger.info(f"apply_rounded_corners 后尺寸: {fitted_wp.size}")
-    fitted_wp.save(LOG_DIR / f"debug_{counter}_{debug_step:02d}_masked.png")
+    _debug_save(fitted_wp, counter, debug_step, "masked")
     debug_step += 1
 
     result = Image.new("RGBA", frame_img.size, (0, 0, 0, 0))
 
     result.paste(fitted_wp, (sx, sy), fitted_wp)
     logger.info(f"壁纸粘贴到位置: ({sx}, {sy})")
-    result.save(LOG_DIR / f"debug_{counter}_{debug_step:02d}_screen_composited.png")
+    _debug_save(result, counter, debug_step, "screen_composited")
     debug_step += 1
 
     if lockscreen_options and lockscreen_options.get("show", True):
         result = _render_lockscreen(result, sw, sh, sx, sy, fitted_wp, lockscreen_options, dev_cfg)
-        result.save(LOG_DIR / f"debug_{counter}_{debug_step:02d}_lockscreen.png")
+        _debug_save(result, counter, debug_step, "lockscreen")
         debug_step += 1
 
     result.paste(frame_img, (0, 0), frame_img)
     logger.info(f"设备框粘贴完成")
-    result.save(LOG_DIR / f"debug_{counter}_{debug_step:02d}_final.png")
+    _debug_save(result, counter, debug_step, "final")
     debug_step += 1
 
     screen_area = result.crop((sx, sy, sx + sw, sy + sh))
     extrema = screen_area.getextrema()
     logger.info(f"屏幕区域极值: R={extrema[0]}, G={extrema[1]}, B={extrema[2]}")
-    
+
     center_pixel = screen_area.getpixel((sw // 2, sh // 2))
     logger.info(f"屏幕中心像素: {center_pixel}")
 

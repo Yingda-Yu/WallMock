@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WallMock - 壁纸样机生成工具</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">📱</span>
+                <span class="logo-text">WallMock</span>
+                <span class="logo-sub">壁纸样机生成工具</span>
+            </div>
+        </header>
+
+        <main class="main">
+            <aside class="sidebar left">
+                <div class="panel">
+                    <div class="panel-title">
+                        <span>壁纸图片</span>
+                        <button id="btnClearImages" class="btn btn-xs btn-ghost">清空</button>
+                    </div>
+
+                    <div id="dropZone" class="drop-zone">
+                        <div class="drop-icon">📤</div>
+                        <div class="drop-text">拖拽图片到这里</div>
+                        <div class="drop-sub">或点击选择文件</div>
+                        <input type="file" id="fileInput" multiple accept="image/*" hidden>
+                    </div>
+
+                    <div id="imageList" class="image-list">
+                        <div class="empty-hint">暂无图片</div>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="preview-section">
+                <div class="preview-toolbar">
+                    <div class="template-selector">
+                        <label>模板：</label>
+                        <select id="templateSelect"></select>
+                    </div>
+                    <div class="preview-info" id="previewInfo"></div>
+                </div>
+                <div class="preview-container">
+                    <div id="previewPlaceholder" class="preview-placeholder">
+                        <div class="placeholder-icon">🖼️</div>
+                        <div class="placeholder-text">上传壁纸后查看预览</div>
+                    </div>
+                    <img id="previewImage" class="preview-image" style="display:none;" alt="预览">
+                </div>
+                <div class="bottom-actions">
+                    <button id="btnReset" class="btn">重置参数</button>
+                    <button id="btnGenerate" class="btn btn-primary btn-large">💾 生成图片</button>
+                </div>
+                <div id="generateResult" class="generate-result"></div>
+            </section>
+
+            <aside class="sidebar right">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="template">模板</button>
+                    <button class="tab-btn" data-tab="wallpaper">壁纸</button>
+                    <button class="tab-btn" data-tab="text">文字</button>
+                    <button class="tab-btn" data-tab="output">输出</button>
+                </div>
+
+                <div class="tab-content active" id="tab-template">
+                    <div class="panel">
+                        <div class="panel-title">背景设置</div>
+                        <div class="form-row">
+                            <label>背景颜色</label>
+                            <div class="color-picker-wrap">
+                                <input type="color" id="bgColor" value="#F5F2EB">
+                                <input type="text" id="bgColorHex" value="#F5F2EB" class="color-hex">
+                            </div>
+                        </div>
+                        <div class="preset-colors">
+                            <span class="color-pres" data-color="#F5F2EB" style="background:#F5F2EB"></span>
+                            <span class="color-pres" data-color="#FFFFFF" style="background:#FFFFFF;border:1px solid #eee"></span>
+                            <span class="color-pres" data-color="#F0F0F0" style="background:#F0F0F0"></span>
+                            <span class="color-pres" data-color="#E8E4DC" style="background:#E8E4DC"></span>
+                            <span class="color-pres" data-color="#2C2C2C" style="background:#2C2C2C"></span>
+                            <span class="color-pres" data-color="#1A1A1A" style="background:#1A1A1A"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="tab-wallpaper">
+                    <div class="panel">
+                        <div class="panel-title">适配方式</div>
+                        <div class="form-row">
+                            <label>适配模式</label>
+                            <select id="fitMode">
+                                <option value="cover">Cover (裁切填充)</option>
+                                <option value="contain">Contain (完整包含)</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label>缩放</label>
+                            <input type="range" id="zoom" min="0.5" max="2" step="0.01" value="1">
+                            <span class="range-val" id="zoomVal">1.00x</span>
+                        </div>
+                        <div class="form-row">
+                            <label>水平偏移</label>
+                            <input type="range" id="offsetX" min="-200" max="200" step="1" value="0">
+                            <span class="range-val" id="offsetXVal">0px</span>
+                        </div>
+                        <div class="form-row">
+                            <label>垂直偏移</label>
+                            <input type="range" id="offsetY" min="-200" max="200" step="1" value="0">
+                            <span class="range-val" id="offsetYVal">0px</span>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-title">锁屏显示</div>
+                        <div class="form-row">
+                            <label class="switch-row">
+                                <input type="checkbox" id="showLockscreen" checked>
+                                <span>显示时间日期</span>
+                            </label>
+                        </div>
+                        <div class="form-row">
+                            <label>时间</label>
+                            <input type="text" id="lockTime" value="9:42">
+                        </div>
+                        <div class="form-row">
+                            <label>日期</label>
+                            <input type="text" id="lockDate" value="1月13日 星期一">
+                        </div>
+                        <div class="form-row">
+                            <label class="switch-row">
+                                <input type="checkbox" id="autoTextColor" checked>
+                                <span>自动文字颜色</span>
+                            </label>
+                        </div>
+                        <div class="form-row" id="textColorRow" style="display:none;">
+                            <label>文字颜色</label>
+                            <input type="color" id="textColor" value="#FFFFFF">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="tab-text">
+                    <div class="panel">
+                        <div class="panel-title">品牌文字</div>
+                        <div class="form-row">
+                            <label class="switch-row">
+                                <input type="checkbox" id="showBrand" checked>
+                                <span>显示品牌</span>
+                            </label>
+                        </div>
+                        <div class="form-row">
+                            <label>品牌名称</label>
+                            <input type="text" id="brandName" value="米草科技">
+                        </div>
+                        <div class="form-row">
+                            <label class="switch-row">
+                                <input type="checkbox" id="showSubtitle" checked>
+                                <span>显示副标题</span>
+                            </label>
+                        </div>
+                        <div class="form-row">
+                            <label>副标题</label>
+                            <select id="subtitlePreset">
+                                <option value="">预设...</option>
+                                <option value="PHONE WALLPAPER">PHONE WALLPAPER</option>
+                                <option value="DESKTOP WALLPAPER">DESKTOP WALLPAPER</option>
+                                <option value="PHONE WALLPAPER SET">PHONE WALLPAPER SET</option>
+                                <option value="DESKTOP, PHONE &amp; TABLET SET">DESKTOP, PHONE &amp; TABLET SET</option>
+                                <option value="DIGITAL WALLPAPER BUNDLE">DIGITAL WALLPAPER BUNDLE</option>
+                            </select>
+                            <input type="text" id="subtitleText" value="PHONE WALLPAPER">
+                        </div>
+                        <div class="form-row">
+                            <label>样式</label>
+                            <select id="textStyle">
+                                <option value="minimal">极简品牌签名</option>
+                                <option value="product">商品信息式副标题</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label>品牌字号</label>
+                            <input type="range" id="brandSize" min="20" max="80" step="1" value="48">
+                            <span class="range-val" id="brandSizeVal">48px</span>
+                        </div>
+                        <div class="form-row">
+                            <label>副标题字号</label>
+                            <input type="range" id="subtitleSize" min="12" max="40" step="1" value="22">
+                            <span class="range-val" id="subtitleSizeVal">22px</span>
+                        </div>
+                        <div class="form-row">
+                            <label>字间距</label>
+                            <input type="range" id="letterSpacing" min="0" max="10" step="1" value="3">
+                            <span class="range-val" id="letterSpacingVal">3px</span>
+                        </div>
+                        <div class="form-row">
+                            <label>行距</label>
+                            <input type="range" id="lineSpacing" min="0" max="30" step="1" value="12">
+                            <span class="range-val" id="lineSpacingVal">12px</span>
+                        </div>
+                        <div class="form-row">
+                            <label>对齐方式</label>
+                            <select id="textAlign">
+                                <option value="center">居中</option>
+                                <option value="left">左对齐</option>
+                                <option value="right">右对齐</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label>品牌颜色</label>
+                            <input type="color" id="brandColor" value="#333333">
+                        </div>
+                        <div class="form-row">
+                            <label>副标题颜色</label>
+                            <input type="color" id="subtitleColor" value="#888888">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="tab-output">
+                    <div class="panel">
+                        <div class="panel-title">输出设置</div>
+                        <div class="form-row">
+                            <label>画布比例</label>
+                            <select id="canvasRatio">
+                                <option value="3:4" data-width="1500" data-height="2000">3:4 (小红书)</option>
+                                <option value="1:1" data-width="2000" data-height="2000">1:1 (正方形)</option>
+                                <option value="4:5" data-width="1600" data-height="2000">4:5 (电商主图)</option>
+                                <option value="9:16" data-width="1080" data-height="1920">9:16 (竖屏视频)</option>
+                                <option value="custom" data-width="2000" data-height="2000">自定义</option>
+                            </select>
+                        </div>
+                        <div class="form-row form-row-half">
+                            <div>
+                                <label>宽度</label>
+                                <input type="number" id="outputWidth" value="1500">
+                            </div>
+                            <div>
+                                <label>高度</label>
+                                <input type="number" id="outputHeight" value="2000">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>格式</label>
+                            <select id="outputFormat">
+                                <option value="JPEG" selected>JPG</option>
+                                <option value="PNG">PNG</option>
+                                <option value="WEBP">WebP</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label>质量</label>
+                            <input type="range" id="outputQuality" min="60" max="100" step="1" value="95">
+                            <span class="range-val" id="outputQualityVal">95</span>
+                        </div>
+                        <div class="form-row">
+                            <label>商品名</label>
+                            <input type="text" id="productName" value="wallpaper">
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="/js/app.js?v=3"></script>
+</body>
+</html>
