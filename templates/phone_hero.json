@@ -1,0 +1,38 @@
+{
+  "id": "phone_hero",
+  "name": "Phone Hero",
+  "category": "hero",
+  "description": "单手机强视觉展示，电商主图首选",
+  "default_canvas": "1:1",
+  "background_color": "#F5F2EB",
+  "thumbnail": "phone",
+  "min_images": 1,
+  "devices": [
+    {
+      "id": "phone1",
+      "type": "dynamic_island_phone",
+      "height_ratio": 0.68,
+      "anchor": "center",
+      "y_offset_ratio": -0.02,
+      "rotation": 0,
+      "z_index": 2,
+      "image_slot": 0,
+      "preferred_orientation": "portrait",
+      "shadow": {
+        "ambient_blur": 0.018,
+        "ambient_opacity": 20,
+        "contact_blur": 0.006,
+        "contact_opacity": 40,
+        "contact_offset": 0.005
+      }
+    }
+  ],
+  "brand": {
+    "mode": "minimal",
+    "y_ratio": 0.94,
+    "default_name": "",
+    "default_subtitle": "PHONE WALLPAPER",
+    "brand_size": 42,
+    "subtitle_size": 20
+  }
+}

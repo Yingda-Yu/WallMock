@@ -1,46 +1,57 @@
 {
   "id": "laptop_phone",
-  "name": "笔记本加手机",
-  "description": "笔记本和手机组合展示，横图放电脑，竖图放手机",
-  "canvas_width": 1500,
-  "canvas_height": 2000,
+  "name": "Laptop + Phone",
+  "category": "hero",
+  "description": "笔记本与手机组合，跨设备壁纸展示",
+  "default_canvas": "1:1",
   "background_color": "#F5F2EB",
+  "thumbnail": "laptop_phone",
+  "min_images": 1,
   "devices": [
     {
       "id": "laptop1",
       "type": "laptop",
-      "x": 0.35,
-      "y": 0.42,
-      "scale": 0.7,
+      "width_ratio": 0.68,
+      "anchor": "upper_center",
+      "y_offset_ratio": 0.0,
       "rotation": 0,
       "z_index": 1,
       "image_slot": 0,
-      "preferred_orientation": "landscape"
+      "preferred_orientation": "landscape",
+      "shadow": {
+        "ambient_blur": 0.02,
+        "ambient_opacity": 16,
+        "contact_blur": 0.007,
+        "contact_opacity": 32,
+        "contact_offset": 0.005
+      }
     },
     {
       "id": "phone1",
       "type": "dynamic_island_phone",
-      "x": 0.82,
-      "y": 0.52,
-      "scale": 0.42,
+      "height_ratio": 0.55,
+      "anchor": "lower_right",
+      "x_offset_ratio": -0.04,
+      "y_offset_ratio": 0.06,
       "rotation": 0,
       "z_index": 3,
       "image_slot": 1,
-      "preferred_orientation": "portrait"
+      "preferred_orientation": "portrait",
+      "shadow": {
+        "ambient_blur": 0.016,
+        "ambient_opacity": 24,
+        "contact_blur": 0.005,
+        "contact_opacity": 45,
+        "contact_offset": 0.006
+      }
     }
   ],
-  "brand_text": {
-    "enabled": true,
-    "x": 0.5,
-    "y": 0.88,
-    "brand_size": 44,
-    "subtitle_size": 22,
+  "brand": {
+    "mode": "minimal",
+    "y_ratio": 0.95,
+    "default_name": "",
     "default_subtitle": "DESKTOP & PHONE WALLPAPER",
-    "align": "center"
-  },
-  "output": {
-    "formats": ["JPEG", "PNG", "WebP"],
-    "default_format": "JPEG",
-    "default_quality": 95
+    "brand_size": 40,
+    "subtitle_size": 19
   }
 }

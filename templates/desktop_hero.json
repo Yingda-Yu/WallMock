@@ -1,0 +1,38 @@
+{
+  "id": "desktop_hero",
+  "name": "Desktop Hero",
+  "category": "hero",
+  "description": "单显示器强视觉展示，适合横屏壁纸",
+  "default_canvas": "4:3",
+  "background_color": "#F5F2EB",
+  "thumbnail": "desktop",
+  "min_images": 1,
+  "devices": [
+    {
+      "id": "monitor1",
+      "type": "desktop_monitor",
+      "width_ratio": 0.74,
+      "anchor": "center",
+      "y_offset_ratio": -0.03,
+      "rotation": 0,
+      "z_index": 2,
+      "image_slot": 0,
+      "preferred_orientation": "landscape",
+      "shadow": {
+        "ambient_blur": 0.02,
+        "ambient_opacity": 16,
+        "contact_blur": 0.008,
+        "contact_opacity": 35,
+        "contact_offset": 0.006
+      }
+    }
+  ],
+  "brand": {
+    "mode": "minimal",
+    "y_ratio": 0.93,
+    "default_name": "",
+    "default_subtitle": "DESKTOP WALLPAPER",
+    "brand_size": 42,
+    "subtitle_size": 20
+  }
+}

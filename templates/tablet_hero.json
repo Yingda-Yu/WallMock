@@ -1,0 +1,38 @@
+{
+  "id": "tablet_hero",
+  "name": "Tablet Hero",
+  "category": "hero",
+  "description": "单平板展示，适合竖屏壁纸",
+  "default_canvas": "1:1",
+  "background_color": "#F5F2EB",
+  "thumbnail": "tablet",
+  "min_images": 1,
+  "devices": [
+    {
+      "id": "tablet1",
+      "type": "tablet",
+      "height_ratio": 0.64,
+      "anchor": "center",
+      "y_offset_ratio": -0.02,
+      "rotation": 0,
+      "z_index": 2,
+      "image_slot": 0,
+      "preferred_orientation": "portrait",
+      "shadow": {
+        "ambient_blur": 0.018,
+        "ambient_opacity": 18,
+        "contact_blur": 0.006,
+        "contact_opacity": 38,
+        "contact_offset": 0.005
+      }
+    }
+  ],
+  "brand": {
+    "mode": "minimal",
+    "y_ratio": 0.94,
+    "default_name": "",
+    "default_subtitle": "TABLET WALLPAPER",
+    "brand_size": 42,
+    "subtitle_size": 20
+  }
+}

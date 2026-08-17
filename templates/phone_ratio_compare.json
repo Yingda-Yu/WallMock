@@ -1,0 +1,60 @@
+{
+  "id": "phone_ratio_compare",
+  "name": "Phone Ratio Compatibility",
+  "category": "info",
+  "description": "9:16与9:19.5手机比例对比说明",
+  "default_canvas": "1:1",
+  "background_color": "#F5F2EB",
+  "thumbnail": "ratio",
+  "min_images": 1,
+  "devices": [
+    {
+      "id": "phone1",
+      "type": "dynamic_island_phone",
+      "height_ratio": 0.56,
+      "anchor": "lower_left",
+      "x_offset_ratio": 0.04,
+      "y_offset_ratio": -0.03,
+      "rotation": 0,
+      "z_index": 2,
+      "image_slot": 0,
+      "preferred_orientation": "portrait",
+      "label_text": "Standard — 9:16",
+      "shadow": {
+        "ambient_blur": 0.016,
+        "ambient_opacity": 20,
+        "contact_blur": 0.006,
+        "contact_opacity": 38,
+        "contact_offset": 0.005
+      }
+    },
+    {
+      "id": "phone2",
+      "type": "punch_hole_phone",
+      "height_ratio": 0.60,
+      "anchor": "lower_right",
+      "x_offset_ratio": -0.04,
+      "y_offset_ratio": -0.03,
+      "rotation": 0,
+      "z_index": 2,
+      "image_slot": 0,
+      "preferred_orientation": "portrait",
+      "label_text": "Tall — 9:19.5",
+      "shadow": {
+        "ambient_blur": 0.016,
+        "ambient_opacity": 20,
+        "contact_blur": 0.006,
+        "contact_opacity": 38,
+        "contact_offset": 0.005
+      }
+    }
+  ],
+  "brand": {
+    "mode": "minimal",
+    "y_ratio": 0.96,
+    "default_name": "",
+    "default_subtitle": "RATIO COMPATIBILITY",
+    "brand_size": 36,
+    "subtitle_size": 17
+  }
+}

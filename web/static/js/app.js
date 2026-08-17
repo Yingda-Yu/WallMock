@@ -1,7 +1,7 @@
 (function() {
     let templates = [];
     let images = [];
-    let currentTemplate = 'single_phone';
+    let currentTemplate = 'phone_hero';
     let previewTimer = null;
 
     function $(sel) { return document.querySelector(sel); }

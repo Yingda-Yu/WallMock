@@ -13,7 +13,7 @@ from PIL import Image
 from core.config import load_settings
 from core.image_loader import image_to_base64_preview, image_to_base64, base64_to_image
 from core.ratio_detector import detect_ratio, recommend_templates
-from core.template_engine import list_templates, load_template, render_template
+from core.template_engine import list_templates, load_template, render_template, get_canvas_presets
 from core.device_renderer import load_device_configs
 
 app = Flask(__name__)
@@ -46,6 +46,11 @@ def api_template_detail(template_id):
 def api_devices():
     configs = load_device_configs()
     return jsonify({"devices": configs})
+
+
+@app.route("/api/canvas-presets", methods=["GET"])
+def api_canvas_presets():
+    return jsonify({"presets": get_canvas_presets()})
 
 
 @app.route("/api/settings", methods=["GET"])
@@ -84,7 +89,7 @@ def api_analyze():
 @app.route("/api/preview", methods=["POST"])
 def api_preview():
     data = request.json or {}
-    template_id = data.get("template_id", "single_phone")
+    template_id = data.get("template_id", "phone_hero")
     image_data_list = data.get("images", [])
     options = data.get("options", {})
 
@@ -107,7 +112,7 @@ def api_preview():
 @app.route("/api/generate", methods=["POST"])
 def api_generate():
     data = request.json or {}
-    template_id = data.get("template_id", "single_phone")
+    template_id = data.get("template_id", "phone_hero")
     image_data_list = data.get("images", [])
     options = data.get("options", {})
     product_name = data.get("product_name", "wallpaper")

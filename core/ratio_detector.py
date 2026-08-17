@@ -22,15 +22,9 @@ def detect_ratio(width, height):
         return {"name": "unknown", "ratio": 0, "orientation": "unknown", "device": "other"}
 
     w, h = float(width), float(height)
-    if w < h:
-        ratio = w / h
-        orientation = "portrait"
-    else:
-        ratio = h / w if orientation_determined(w, h) == "portrait" else w / h
-        orientation = "landscape" if w > h else "square"
+    orientation = "portrait" if h > w else ("landscape" if w > h else "square")
 
     ratio_value = min(w, h) / max(w, h)
-    orientation = "portrait" if h > w else ("landscape" if w > h else "square")
 
     best_match = None
     best_diff = float("inf")
@@ -59,10 +53,6 @@ def detect_ratio(width, height):
         }
 
 
-def orientation_determined(w, h):
-    return "portrait" if h > w else "landscape"
-
-
 def _guess_device(orientation, aspect):
     if orientation == "portrait":
         if aspect < 0.5:
@@ -85,32 +75,29 @@ def _guess_device(orientation, aspect):
 
 def recommend_templates(images_info):
     if not images_info:
-        return ["single_phone"]
+        return ["phone_hero"]
 
     count = len(images_info)
     portrait_count = sum(1 for img in images_info if img.get("ratio_info", {}).get("orientation") == "portrait")
     landscape_count = sum(1 for img in images_info if img.get("ratio_info", {}).get("orientation") == "landscape")
 
-    templates = []
-
     if count == 1:
         img = images_info[0]
-        if img.get("ratio_info", {}).get("orientation") == "portrait":
-            templates = ["single_phone", "laptop_phone", "all_devices"]
-        elif img.get("ratio_info", {}).get("orientation") == "landscape":
-            templates = ["desktop", "laptop_phone", "all_devices"]
+        orientation = img.get("ratio_info", {}).get("orientation")
+        if orientation == "portrait":
+            return ["phone_hero", "laptop_phone", "device_trio"]
+        elif orientation == "landscape":
+            return ["desktop_hero", "laptop_phone", "device_trio"]
         else:
-            templates = ["single_phone", "desktop"]
+            return ["phone_hero", "desktop_hero"]
     elif count == 2:
         if portrait_count == 2:
-            templates = ["double_phone", "phone_pack_6"]
+            return ["wallpaper_collection", "phone_ratio_compare"]
         elif landscape_count == 2:
-            templates = ["desktop", "all_devices"]
+            return ["desktop_hero", "device_trio"]
         else:
-            templates = ["laptop_phone", "all_devices"]
+            return ["laptop_phone", "device_trio"]
     elif 3 <= count <= 5:
-        templates = ["phone_pack_6", "double_phone"]
+        return ["device_trio", "wallpaper_collection"]
     else:
-        templates = ["phone_pack_6", "all_devices"]
-
-    return templates
+        return ["wallpaper_collection", "device_trio"]

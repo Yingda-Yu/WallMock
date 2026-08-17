@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WallMock - 壁纸样机生成工具</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/style.css?v=4">
 </head>
 <body>
     <div class="app">
@@ -39,9 +39,15 @@
 
             <section class="preview-section">
                 <div class="preview-toolbar">
-                    <div class="template-selector">
-                        <label>模板：</label>
-                        <select id="templateSelect"></select>
+                    <div class="toolbar-left">
+                        <div class="template-selector">
+                            <label>模板</label>
+                            <select id="templateSelect"></select>
+                        </div>
+                        <div class="canvas-selector">
+                            <label>画布</label>
+                            <select id="canvasPreset"></select>
+                        </div>
                     </div>
                     <div class="preview-info" id="previewInfo"></div>
                 </div>
@@ -61,40 +67,47 @@
 
             <aside class="sidebar right">
                 <div class="tabs">
-                    <button class="tab-btn active" data-tab="template">模板</button>
+                    <button class="tab-btn active" data-tab="background">背景</button>
                     <button class="tab-btn" data-tab="wallpaper">壁纸</button>
                     <button class="tab-btn" data-tab="text">文字</button>
                     <button class="tab-btn" data-tab="output">输出</button>
                 </div>
 
-                <div class="tab-content active" id="tab-template">
+                <div class="tab-content active" id="tab-background">
                     <div class="panel">
-                        <div class="panel-title">背景设置</div>
-                        <div class="form-row">
-                            <label>背景颜色</label>
+                        <div class="panel-title">背景颜色</div>
+                        <div class="bg-presets">
+                            <button class="bg-preset" data-color="#F5F2EB" style="background:#F5F2EB">暖白</button>
+                            <button class="bg-preset" data-color="#FFFFFF" style="background:#FFFFFF;border-color:#eee">纯白</button>
+                            <button class="bg-preset" data-color="#F2F2F2" style="background:#F2F2F2">浅灰</button>
+                            <button class="bg-preset" data-color="#202020" style="background:#202020;color:#fff">炭灰</button>
+                            <button class="bg-preset" data-color="#111111" style="background:#111111;color:#fff">近黑</button>
+                        </div>
+                        <div class="form-row" style="margin-top:12px">
+                            <label>自定义颜色</label>
                             <div class="color-picker-wrap">
                                 <input type="color" id="bgColor" value="#F5F2EB">
                                 <input type="text" id="bgColorHex" value="#F5F2EB" class="color-hex">
                             </div>
                         </div>
-                        <div class="preset-colors">
-                            <span class="color-pres" data-color="#F5F2EB" style="background:#F5F2EB"></span>
-                            <span class="color-pres" data-color="#FFFFFF" style="background:#FFFFFF;border:1px solid #eee"></span>
-                            <span class="color-pres" data-color="#F0F0F0" style="background:#F0F0F0"></span>
-                            <span class="color-pres" data-color="#E8E4DC" style="background:#E8E4DC"></span>
-                            <span class="color-pres" data-color="#2C2C2C" style="background:#2C2C2C"></span>
-                            <span class="color-pres" data-color="#1A1A1A" style="background:#1A1A1A"></span>
+                        <div class="form-row">
+                            <label>背景模式</label>
+                            <select id="bgMode">
+                                <option value="solid">纯色</option>
+                                <option value="gradient" selected>微渐变</option>
+                                <option value="adaptive">自适应壁纸色</option>
+                            </select>
                         </div>
                     </div>
                 </div>
 
                 <div class="tab-content" id="tab-wallpaper">
                     <div class="panel">
-                        <div class="panel-title">适配方式</div>
+                        <div class="panel-title">壁纸适配</div>
                         <div class="form-row">
                             <label>适配模式</label>
                             <select id="fitMode">
-                                <option value="cover">Cover (裁切填充)</option>
+                                <option value="cover" selected>Cover (裁切填充)</option>
                                 <option value="contain">Contain (完整包含)</option>
                             </select>
                         </div>
@@ -137,10 +150,6 @@
                                 <span>自动文字颜色</span>
                             </label>
                         </div>
-                        <div class="form-row" id="textColorRow" style="display:none;">
-                            <label>文字颜色</label>
-                            <input type="color" id="textColor" value="#FFFFFF">
-                        </div>
                     </div>
                 </div>
 
@@ -148,67 +157,34 @@
                     <div class="panel">
                         <div class="panel-title">品牌文字</div>
                         <div class="form-row">
-                            <label class="switch-row">
-                                <input type="checkbox" id="showBrand" checked>
-                                <span>显示品牌</span>
-                            </label>
+                            <label>显示模式</label>
+                            <select id="brandMode">
+                                <option value="none">无</option>
+                                <option value="minimal" selected>极简签名</option>
+                                <option value="watermark">水印防盗</option>
+                            </select>
                         </div>
                         <div class="form-row">
                             <label>品牌名称</label>
-                            <input type="text" id="brandName" value="米草科技">
-                        </div>
-                        <div class="form-row">
-                            <label class="switch-row">
-                                <input type="checkbox" id="showSubtitle" checked>
-                                <span>显示副标题</span>
-                            </label>
+                            <input type="text" id="brandName" value="" placeholder="留空则不显示">
                         </div>
                         <div class="form-row">
                             <label>副标题</label>
                             <select id="subtitlePreset">
-                                <option value="">预设...</option>
+                                <option value="">使用模板默认</option>
                                 <option value="PHONE WALLPAPER">PHONE WALLPAPER</option>
                                 <option value="DESKTOP WALLPAPER">DESKTOP WALLPAPER</option>
-                                <option value="PHONE WALLPAPER SET">PHONE WALLPAPER SET</option>
-                                <option value="DESKTOP, PHONE &amp; TABLET SET">DESKTOP, PHONE &amp; TABLET SET</option>
-                                <option value="DIGITAL WALLPAPER BUNDLE">DIGITAL WALLPAPER BUNDLE</option>
+                                <option value="TABLET WALLPAPER">TABLET WALLPAPER</option>
+                                <option value="ALL DEVICES WALLPAPER SET">ALL DEVICES WALLPAPER SET</option>
+                                <option value="DESKTOP & PHONE WALLPAPER">DESKTOP & PHONE WALLPAPER</option>
+                                <option value="WALLPAPER COLLECTION">WALLPAPER COLLECTION</option>
                             </select>
-                            <input type="text" id="subtitleText" value="PHONE WALLPAPER">
+                            <input type="text" id="subtitleText" value="" placeholder="使用模板默认" style="margin-top:4px">
                         </div>
                         <div class="form-row">
-                            <label>样式</label>
-                            <select id="textStyle">
-                                <option value="minimal">极简品牌签名</option>
-                                <option value="product">商品信息式副标题</option>
-                            </select>
-                        </div>
-                        <div class="form-row">
-                            <label>品牌字号</label>
-                            <input type="range" id="brandSize" min="20" max="80" step="1" value="48">
-                            <span class="range-val" id="brandSizeVal">48px</span>
-                        </div>
-                        <div class="form-row">
-                            <label>副标题字号</label>
-                            <input type="range" id="subtitleSize" min="12" max="40" step="1" value="22">
-                            <span class="range-val" id="subtitleSizeVal">22px</span>
-                        </div>
-                        <div class="form-row">
-                            <label>字间距</label>
-                            <input type="range" id="letterSpacing" min="0" max="10" step="1" value="3">
-                            <span class="range-val" id="letterSpacingVal">3px</span>
-                        </div>
-                        <div class="form-row">
-                            <label>行距</label>
-                            <input type="range" id="lineSpacing" min="0" max="30" step="1" value="12">
-                            <span class="range-val" id="lineSpacingVal">12px</span>
-                        </div>
-                        <div class="form-row">
-                            <label>对齐方式</label>
-                            <select id="textAlign">
-                                <option value="center">居中</option>
-                                <option value="left">左对齐</option>
-                                <option value="right">右对齐</option>
-                            </select>
+                            <label>不透明度</label>
+                            <input type="range" id="brandOpacity" min="0" max="100" step="5" value="45">
+                            <span class="range-val" id="brandOpacityVal">45%</span>
                         </div>
                         <div class="form-row">
                             <label>品牌颜色</label>
@@ -218,30 +194,26 @@
                             <label>副标题颜色</label>
                             <input type="color" id="subtitleColor" value="#888888">
                         </div>
+                        <div id="watermarkRow" style="display:none">
+                            <div class="form-row">
+                                <label>水印文字</label>
+                                <input type="text" id="watermarkText" value="SPARTINA">
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="tab-content" id="tab-output">
                     <div class="panel">
                         <div class="panel-title">输出设置</div>
-                        <div class="form-row">
-                            <label>画布比例</label>
-                            <select id="canvasRatio">
-                                <option value="3:4" data-width="1500" data-height="2000">3:4 (小红书)</option>
-                                <option value="1:1" data-width="2000" data-height="2000">1:1 (正方形)</option>
-                                <option value="4:5" data-width="1600" data-height="2000">4:5 (电商主图)</option>
-                                <option value="9:16" data-width="1080" data-height="1920">9:16 (竖屏视频)</option>
-                                <option value="custom" data-width="2000" data-height="2000">自定义</option>
-                            </select>
-                        </div>
                         <div class="form-row form-row-half">
                             <div>
                                 <label>宽度</label>
-                                <input type="number" id="outputWidth" value="1500">
+                                <input type="number" id="outputWidth" value="2400">
                             </div>
                             <div>
                                 <label>高度</label>
-                                <input type="number" id="outputHeight" value="2000">
+                                <input type="number" id="outputHeight" value="2400">
                             </div>
                         </div>
                         <div class="form-row">
@@ -269,6 +241,6 @@
 
     <div id="toast" class="toast"></div>
 
-    <script src="/js/app.js?v=3"></script>
+    <script src="/js/app.js?v=4"></script>
 </body>
 </html>

@@ -4,15 +4,15 @@
     "category": "phone",
     "frame_image": "assets/device_frames/dynamic_island_phone.png",
     "screen": {
-      "x": 20,
-      "y": 20,
-      "width": 800,
-      "height": 1733,
-      "corner_radius": 48
+      "x": 40,
+      "y": 40,
+      "width": 1600,
+      "height": 3466,
+      "corner_radius": 96
     },
     "total_size": {
-      "width": 860,
-      "height": 1803
+      "width": 1680,
+      "height": 3546
     },
     "screen_ratio": 0.46153846153846156,
     "has_cutout": true,
@@ -28,15 +28,15 @@
     "category": "phone",
     "frame_image": "assets/device_frames/notch_phone.png",
     "screen": {
-      "x": 14,
-      "y": 14,
-      "width": 800,
-      "height": 1688,
-      "corner_radius": 40
+      "x": 28,
+      "y": 28,
+      "width": 1600,
+      "height": 3377,
+      "corner_radius": 80
     },
     "total_size": {
-      "width": 848,
-      "height": 1746
+      "width": 1656,
+      "height": 3433
     },
     "screen_ratio": 0.47368421052631576,
     "has_cutout": true,
@@ -52,15 +52,15 @@
     "category": "phone",
     "frame_image": "assets/device_frames/waterdrop_phone.png",
     "screen": {
-      "x": 12,
-      "y": 12,
-      "width": 800,
-      "height": 1733,
-      "corner_radius": 36
+      "x": 24,
+      "y": 24,
+      "width": 1600,
+      "height": 3466,
+      "corner_radius": 72
     },
     "total_size": {
-      "width": 844,
-      "height": 1787
+      "width": 1648,
+      "height": 3514
     },
     "screen_ratio": 0.46153846153846156,
     "has_cutout": true,
@@ -77,15 +77,15 @@
     "category": "phone",
     "frame_image": "assets/device_frames/punch_hole_phone.png",
     "screen": {
-      "x": 10,
-      "y": 10,
-      "width": 800,
-      "height": 1777,
-      "corner_radius": 32
+      "x": 20,
+      "y": 20,
+      "width": 1600,
+      "height": 3555,
+      "corner_radius": 64
     },
     "total_size": {
-      "width": 840,
-      "height": 1827
+      "width": 1640,
+      "height": 3595
     },
     "screen_ratio": 0.45,
     "has_cutout": true,
@@ -102,15 +102,15 @@
     "category": "phone",
     "frame_image": "assets/device_frames/no_notch_phone.png",
     "screen": {
-      "x": 10,
-      "y": 10,
-      "width": 800,
-      "height": 1688,
-      "corner_radius": 32
+      "x": 20,
+      "y": 20,
+      "width": 1600,
+      "height": 3377,
+      "corner_radius": 64
     },
     "total_size": {
-      "width": 840,
-      "height": 1738
+      "width": 1640,
+      "height": 3417
     },
     "screen_ratio": 0.47368421052631576,
     "has_cutout": false,
@@ -122,15 +122,15 @@
     "category": "tablet",
     "frame_image": "assets/device_frames/tablet.png",
     "screen": {
-      "x": 28,
-      "y": 28,
-      "width": 800,
-      "height": 1066,
-      "corner_radius": 24
+      "x": 56,
+      "y": 56,
+      "width": 1600,
+      "height": 2133,
+      "corner_radius": 48
     },
     "total_size": {
-      "width": 880,
-      "height": 1158
+      "width": 1712,
+      "height": 2245
     },
     "screen_ratio": 0.75,
     "has_cutout": false,
@@ -142,15 +142,15 @@
     "category": "laptop",
     "frame_image": "assets/device_frames/laptop.png",
     "screen": {
-      "x": 62,
-      "y": 60,
-      "width": 800,
-      "height": 500,
-      "corner_radius": 12
+      "x": 124,
+      "y": 120,
+      "width": 1600,
+      "height": 1000,
+      "corner_radius": 24
     },
     "total_size": {
-      "width": 954,
-      "height": 740
+      "width": 1848,
+      "height": 1310
     },
     "screen_ratio": 1.6,
     "has_cutout": true,
@@ -167,15 +167,15 @@
     "category": "monitor",
     "frame_image": "assets/device_frames/desktop_monitor.png",
     "screen": {
-      "x": 68,
-      "y": 48,
-      "width": 800,
-      "height": 450,
-      "corner_radius": 8
+      "x": 136,
+      "y": 96,
+      "width": 1600,
+      "height": 900,
+      "corner_radius": 16
     },
     "total_size": {
-      "width": 966,
-      "height": 758
+      "width": 1872,
+      "height": 1212
     },
     "screen_ratio": 1.7777777777777777,
     "has_cutout": false,

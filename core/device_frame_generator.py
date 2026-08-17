@@ -5,7 +5,6 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ASSETS_DIR = BASE_DIR / "assets" / "device_frames"
-DEVICE_CONFIGS_DIR = BASE_DIR / "assets" / "device_frames"
 
 DEVICE_TYPES = {
     "dynamic_island_phone": {
@@ -118,13 +117,11 @@ def hex_to_rgb(hex_color):
     return tuple(int(hex_color[i : i + 2], 16) for i in (0, 2, 4))
 
 
-def generate_device_frame(device_type, base_size=800):
+def generate_device_frame(device_type, base_size=1600):
     if device_type not in DEVICE_TYPES:
         raise ValueError(f"未知设备类型: {device_type}")
-
     config = DEVICE_TYPES[device_type]
     category = config["category"]
-
     if category == "phone":
         return _generate_phone_frame(config, base_size)
     elif category == "tablet":
@@ -138,9 +135,10 @@ def generate_device_frame(device_type, base_size=800):
 
 
 def _generate_phone_frame(config, base_size):
+    mult = base_size / 800
     ratio = config["screen_ratio"]
-    frame_w = config["frame_width"]
-    corner_r = config["corner_radius"]
+    frame_w = int(config["frame_width"] * mult)
+    corner_r = int(config["corner_radius"] * mult)
     color = hex_to_rgb(config["color"])
 
     screen_w = base_size
@@ -155,15 +153,15 @@ def _generate_phone_frame(config, base_size):
     outer_r = corner_r + frame_w
     draw.rounded_rectangle([(0, 0), (total_w - 1, total_h - 1)], radius=outer_r, fill=color + (255,))
 
-    screen_inner_r = corner_r - 1
+    screen_inner_r = max(corner_r - int(mult), 0)
     draw.rounded_rectangle([(frame_w, frame_w), (total_w - frame_w - 1, total_h - frame_w - 1)], radius=screen_inner_r, fill=(0, 0, 0, 0))
 
     if config.get("dynamic_island"):
         di = config["dynamic_island"]
-        di_w = di["width"]
-        di_h = di["height"]
+        di_w = int(di["width"] * mult)
+        di_h = int(di["height"] * mult)
         di_x = (total_w - di_w) // 2
-        di_y = frame_w + di["y_offset"]
+        di_y = frame_w + int(di["y_offset"] * mult)
         draw.rounded_rectangle(
             [(di_x, di_y), (di_x + di_w - 1, di_y + di_h - 1)],
             radius=di_h // 2,
@@ -172,10 +170,10 @@ def _generate_phone_frame(config, base_size):
 
     if config.get("notch"):
         notch = config["notch"]
-        n_w = notch["width"]
-        n_h = notch["height"]
+        n_w = int(notch["width"] * mult)
+        n_h = int(notch["height"] * mult)
         n_x = (total_w - n_w) // 2
-        n_y = frame_w + notch["y_offset"]
+        n_y = frame_w + int(notch["y_offset"] * mult)
         draw.rounded_rectangle(
             [(n_x, n_y), (n_x + n_w - 1, n_y + n_h - 1)],
             radius=n_h // 2,
@@ -184,32 +182,22 @@ def _generate_phone_frame(config, base_size):
 
     if config.get("punch_hole"):
         ph = config["punch_hole"]
-        ph_size = ph["size"]
-        if ph["type"] == "waterdrop":
-            ph_x = total_w // 2 + ph["x_offset"]
-            ph_y = frame_w + ph["y_offset"]
-            draw.ellipse(
-                [(ph_x - ph_size // 2, ph_y - ph_size // 2), (ph_x + ph_size // 2, ph_y + ph_size // 2)],
-                fill=(0, 0, 0, 255),
-            )
-        elif ph["type"] == "center":
-            ph_x = total_w // 2 + ph["x_offset"]
-            ph_y = frame_w + ph["y_offset"]
-            draw.ellipse(
-                [(ph_x - ph_size // 2, ph_y - ph_size // 2), (ph_x + ph_size // 2, ph_y + ph_size // 2)],
-                fill=(0, 0, 0, 255),
-            )
+        ph_size = int(ph["size"] * mult)
+        ph_x = total_w // 2 + int(ph["x_offset"] * mult)
+        ph_y = frame_w + int(ph["y_offset"] * mult)
+        draw.ellipse(
+            [(ph_x - ph_size // 2, ph_y - ph_size // 2), (ph_x + ph_size // 2, ph_y + ph_size // 2)],
+            fill=(0, 0, 0, 255),
+        )
 
     if config.get("side_buttons"):
-        btn_w = 4
-        btn_h = 60
-        btn_x = total_w - 1
-        btn_y = total_h * 0.25
+        btn_w = max(int(4 * mult), 6)
+        btn_h = int(60 * mult)
+        btn_x = total_w - btn_w
+        btn_y = int(total_h * 0.25)
         draw.rectangle([(btn_x, btn_y), (btn_x + btn_w, btn_y + btn_h)], fill=color + (200,))
-        btn_y2 = total_h * 0.42
-        draw.rectangle([(btn_x, btn_y2), (btn_x + btn_w, btn_y2 + btn_h * 1.5)], fill=color + (200,))
-
-    img = _add_shadow(img, offset=(10, 15), blur=30, opacity=120)
+        btn_y2 = int(total_h * 0.42)
+        draw.rectangle([(btn_x, btn_y2), (btn_x + btn_w, btn_y2 + int(btn_h * 1.5))], fill=color + (200,))
 
     screen_rect = {
         "x": frame_w,
@@ -218,14 +206,14 @@ def _generate_phone_frame(config, base_size):
         "height": screen_h,
         "corner_radius": corner_r,
     }
-
     return img, screen_rect
 
 
 def _generate_tablet_frame(config, base_size):
+    mult = base_size / 800
     ratio = config["screen_ratio"]
-    frame_w = config["frame_width"]
-    corner_r = config["corner_radius"]
+    frame_w = int(config["frame_width"] * mult)
+    corner_r = int(config["corner_radius"] * mult)
     color = hex_to_rgb(config["color"])
 
     screen_w = base_size
@@ -240,10 +228,8 @@ def _generate_tablet_frame(config, base_size):
     outer_r = corner_r + frame_w
     draw.rounded_rectangle([(0, 0), (total_w - 1, total_h - 1)], radius=outer_r, fill=color + (255,))
 
-    screen_inner_r = corner_r - 1
+    screen_inner_r = max(corner_r - int(mult), 0)
     draw.rounded_rectangle([(frame_w, frame_w), (total_w - frame_w - 1, total_h - frame_w - 1)], radius=screen_inner_r, fill=(0, 0, 0, 0))
-
-    img = _add_shadow(img, offset=(12, 18), blur=40, opacity=100)
 
     screen_rect = {
         "x": frame_w,
@@ -252,16 +238,16 @@ def _generate_tablet_frame(config, base_size):
         "height": screen_h,
         "corner_radius": corner_r,
     }
-
     return img, screen_rect
 
 
 def _generate_laptop_frame(config, base_size):
+    mult = base_size / 800
     ratio = config["screen_ratio"]
-    side_frame = config["frame_width"]
-    top_frame = config["top_frame_width"]
-    bottom_frame = config["bottom_frame_width"]
-    corner_r = config["corner_radius"]
+    side_frame = int(config["frame_width"] * mult)
+    top_frame = int(config["top_frame_width"] * mult)
+    bottom_frame = int(config["bottom_frame_width"] * mult)
+    corner_r = int(config["corner_radius"] * mult)
     color = hex_to_rgb(config["color"])
 
     screen_w = base_size
@@ -270,51 +256,51 @@ def _generate_laptop_frame(config, base_size):
     total_w = screen_w + side_frame * 2
     total_h = screen_h + top_frame + bottom_frame
 
-    img = Image.new("RGBA", (total_w + 80, total_h + 120), (0, 0, 0, 0))
+    pad_x = int(40 * mult)
+    pad_y = int(30 * mult)
+    img_w = total_w + pad_x * 2
+    img_h = total_h + pad_y * 2 + int(15 * mult)
+
+    img = Image.new("RGBA", (img_w, img_h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
-    offset_x = 40
-    offset_y = 30
-
     draw.rounded_rectangle(
-        [(offset_x, offset_y), (offset_x + total_w - 1, offset_y + total_h - 1)],
-        radius=corner_r + 4,
+        [(pad_x, pad_y), (pad_x + total_w - 1, pad_y + total_h - 1)],
+        radius=corner_r + int(4 * mult),
         fill=color + (255,),
     )
 
     draw.rounded_rectangle(
-        [(offset_x + side_frame, offset_y + top_frame), (offset_x + total_w - side_frame - 1, offset_y + total_h - bottom_frame - 1)],
-        radius=corner_r - 1,
+        [(pad_x + side_frame, pad_y + top_frame), (pad_x + total_w - side_frame - 1, pad_y + total_h - bottom_frame - 1)],
+        radius=max(corner_r - int(mult), 0),
         fill=(0, 0, 0, 0),
     )
 
-    screen_x = offset_x + side_frame
-    screen_y = offset_y + top_frame
+    screen_x = pad_x + side_frame
+    screen_y = pad_y + top_frame
 
     if config.get("punch_hole"):
         ph = config["punch_hole"]
-        ph_size = ph["size"]
-        ph_x = offset_x + total_w // 2 + ph["x_offset"]
-        ph_y = offset_y + top_frame // 2 + ph["y_offset"] - 6
+        ph_size = int(ph["size"] * mult)
+        ph_x = pad_x + total_w // 2 + int(ph["x_offset"] * mult)
+        ph_y = pad_y + top_frame // 2 + int(ph["y_offset"] * mult) - int(6 * mult)
         draw.ellipse(
             [(ph_x - ph_size // 2, ph_y - ph_size // 2), (ph_x + ph_size // 2, ph_y + ph_size // 2)],
             fill=(20, 20, 20, 255),
         )
 
-    base_y = offset_y + total_h - 5
-    base_top_w = total_w + 30
-    base_bottom_w = total_w + 60
-    base_h = 15
+    base_y = pad_y + total_h - int(5 * mult)
+    base_top_w = total_w + int(30 * mult)
+    base_bottom_w = total_w + int(60 * mult)
+    base_h = int(15 * mult)
 
     base_pts = [
-        (offset_x - 15, base_y),
-        (offset_x + total_w + 15, base_y),
-        (offset_x + total_w + 30, base_y + base_h),
-        (offset_x - 30, base_y + base_h),
+        (pad_x - int(15 * mult), base_y),
+        (pad_x + total_w + int(15 * mult), base_y),
+        (pad_x + total_w + int(30 * mult), base_y + base_h),
+        (pad_x - int(30 * mult), base_y + base_h),
     ]
     draw.polygon(base_pts, fill=hex_to_rgb("#4A4A4A") + (255,))
-
-    img = _add_shadow(img, offset=(15, 20), blur=45, opacity=90)
 
     screen_rect = {
         "x": screen_x,
@@ -323,16 +309,16 @@ def _generate_laptop_frame(config, base_size):
         "height": screen_h,
         "corner_radius": corner_r,
     }
-
     return img, screen_rect
 
 
 def _generate_monitor_frame(config, base_size):
+    mult = base_size / 800
     ratio = config["screen_ratio"]
-    side_frame = config["frame_width"]
-    top_frame = config["top_frame_width"]
-    bottom_frame = config["bottom_frame_width"]
-    corner_r = config["corner_radius"]
+    side_frame = int(config["frame_width"] * mult)
+    top_frame = int(config["top_frame_width"] * mult)
+    bottom_frame = int(config["bottom_frame_width"] * mult)
+    corner_r = int(config["corner_radius"] * mult)
     color = hex_to_rgb(config["color"])
 
     screen_w = base_size
@@ -341,47 +327,48 @@ def _generate_monitor_frame(config, base_size):
     total_w = screen_w + side_frame * 2
     total_h = screen_h + top_frame + bottom_frame
 
-    img = Image.new("RGBA", (total_w + 100, total_h + 200), (0, 0, 0, 0))
+    pad_x = int(50 * mult)
+    pad_y = int(30 * mult)
+    stand_h = int(68 * mult)
+    img_w = total_w + pad_x * 2
+    img_h = total_h + pad_y + stand_h
+
+    img = Image.new("RGBA", (img_w, img_h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
-    offset_x = 50
-    offset_y = 30
-
     draw.rounded_rectangle(
-        [(offset_x, offset_y), (offset_x + total_w - 1, offset_y + total_h - 1)],
-        radius=corner_r + 4,
+        [(pad_x, pad_y), (pad_x + total_w - 1, pad_y + total_h - 1)],
+        radius=corner_r + int(4 * mult),
         fill=color + (255,),
     )
 
     draw.rounded_rectangle(
-        [(offset_x + side_frame, offset_y + top_frame), (offset_x + total_w - side_frame - 1, offset_y + total_h - bottom_frame - 1)],
-        radius=corner_r - 1,
+        [(pad_x + side_frame, pad_y + top_frame), (pad_x + total_w - side_frame - 1, pad_y + total_h - bottom_frame - 1)],
+        radius=max(corner_r - int(mult), 0),
         fill=(0, 0, 0, 0),
     )
 
-    screen_x = offset_x + side_frame
-    screen_y = offset_y + top_frame
+    screen_x = pad_x + side_frame
+    screen_y = pad_y + top_frame
 
-    stand_top_y = offset_y + total_h
-    stand_top_w = total_w * 0.2
-    stand_top_x = offset_x + (total_w - stand_top_w) // 2
-    stand_top_h = 50
+    stand_top_y = pad_y + total_h
+    stand_top_w = int(total_w * 0.2)
+    stand_top_x = pad_x + (total_w - stand_top_w) // 2
+    stand_top_h = int(50 * mult)
     draw.rectangle(
         [(stand_top_x, stand_top_y), (stand_top_x + stand_top_w, stand_top_y + stand_top_h)],
         fill=hex_to_rgb("#555555") + (255,),
     )
 
     stand_base_y = stand_top_y + stand_top_h
-    stand_base_w = total_w * 0.45
-    stand_base_x = offset_x + (total_w - stand_base_w) // 2
-    stand_base_h = 18
+    stand_base_w = int(total_w * 0.45)
+    stand_base_x = pad_x + (total_w - stand_base_w) // 2
+    stand_base_h = int(18 * mult)
     draw.rounded_rectangle(
         [(stand_base_x, stand_base_y), (stand_base_x + stand_base_w, stand_base_y + stand_base_h)],
         radius=stand_base_h // 2,
         fill=hex_to_rgb("#444444") + (255,),
     )
-
-    img = _add_shadow(img, offset=(15, 25), blur=50, opacity=80)
 
     screen_rect = {
         "x": screen_x,
@@ -390,36 +377,10 @@ def _generate_monitor_frame(config, base_size):
         "height": screen_h,
         "corner_radius": corner_r,
     }
-
     return img, screen_rect
 
 
-def _add_shadow(img, offset=(10, 10), blur=20, opacity=100):
-    shadow = Image.new("RGBA", img.size, (0, 0, 0, 0))
-    alpha = img.split()[-1]
-
-    shadow_layer = Image.new("RGBA", img.size, (0, 0, 0, opacity))
-    shadow_layer.putalpha(alpha)
-
-    for _ in range(blur // 2):
-        shadow_layer = shadow_layer.filter(ImageFilter.BLUR)
-
-    shadow_layer = shadow_layer.filter(ImageFilter.GaussianBlur(radius=blur // 3))
-
-    result = Image.new("RGBA", (img.width + abs(offset[0]) * 2, img.height + abs(offset[1]) * 2), (0, 0, 0, 0))
-
-    shadow_x = offset[0] + abs(offset[0])
-    shadow_y = offset[1] + abs(offset[1])
-    result.paste(shadow_layer, (shadow_x, shadow_y), shadow_layer)
-
-    frame_x = abs(offset[0])
-    frame_y = abs(offset[1])
-    result.paste(img, (frame_x, frame_y), img)
-
-    return result
-
-
-def generate_all_devices(base_size=800):
+def generate_all_devices(base_size=1600):
     os.makedirs(ASSETS_DIR, exist_ok=True)
     configs = {}
 

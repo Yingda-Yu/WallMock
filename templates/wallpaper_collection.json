@@ -1,0 +1,96 @@
+{
+  "id": "wallpaper_collection",
+  "name": "Wallpaper Collection",
+  "category": "collection",
+  "description": "4台手机错落展示不同壁纸，适合壁纸合集",
+  "default_canvas": "1:1",
+  "background_color": "#F5F2EB",
+  "thumbnail": "collection",
+  "min_images": 4,
+  "devices": [
+    {
+      "id": "phone1",
+      "type": "dynamic_island_phone",
+      "height_ratio": 0.46,
+      "anchor": "lower_left",
+      "x_offset_ratio": 0.06,
+      "y_offset_ratio": -0.04,
+      "rotation": -3,
+      "z_index": 2,
+      "image_slot": 0,
+      "preferred_orientation": "portrait",
+      "shadow": {
+        "ambient_blur": 0.016,
+        "ambient_opacity": 22,
+        "contact_blur": 0.006,
+        "contact_opacity": 40,
+        "contact_offset": 0.005
+      }
+    },
+    {
+      "id": "phone2",
+      "type": "punch_hole_phone",
+      "height_ratio": 0.50,
+      "anchor": "upper_center",
+      "x_offset_ratio": -0.08,
+      "y_offset_ratio": 0.04,
+      "rotation": 2,
+      "z_index": 3,
+      "image_slot": 1,
+      "preferred_orientation": "portrait",
+      "shadow": {
+        "ambient_blur": 0.016,
+        "ambient_opacity": 24,
+        "contact_blur": 0.006,
+        "contact_opacity": 42,
+        "contact_offset": 0.005
+      }
+    },
+    {
+      "id": "phone3",
+      "type": "notch_phone",
+      "height_ratio": 0.44,
+      "anchor": "lower_right",
+      "x_offset_ratio": -0.06,
+      "y_offset_ratio": -0.03,
+      "rotation": 4,
+      "z_index": 2,
+      "image_slot": 2,
+      "preferred_orientation": "portrait",
+      "shadow": {
+        "ambient_blur": 0.016,
+        "ambient_opacity": 22,
+        "contact_blur": 0.006,
+        "contact_opacity": 40,
+        "contact_offset": 0.005
+      }
+    },
+    {
+      "id": "phone4",
+      "type": "no_notch_phone",
+      "height_ratio": 0.42,
+      "anchor": "upper_right",
+      "x_offset_ratio": -0.02,
+      "y_offset_ratio": 0.02,
+      "rotation": -2,
+      "z_index": 1,
+      "image_slot": 3,
+      "preferred_orientation": "portrait",
+      "shadow": {
+        "ambient_blur": 0.016,
+        "ambient_opacity": 20,
+        "contact_blur": 0.006,
+        "contact_opacity": 38,
+        "contact_offset": 0.005
+      }
+    }
+  ],
+  "brand": {
+    "mode": "minimal",
+    "y_ratio": 0.96,
+    "default_name": "",
+    "default_subtitle": "WALLPAPER COLLECTION",
+    "brand_size": 38,
+    "subtitle_size": 18
+  }
+}
