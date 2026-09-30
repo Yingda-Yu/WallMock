@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "design.schema.json",
+  "title": "Design",
+  "description": "Aesthetic/product design, independent of phone model",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "display_name"],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Design schema version. Must be 1 for Phase 1."
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]*$",
+      "description": "Design ID, e.g. 'blue-hydrangea'"
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable design name"
+    },
+    "case_artwork": {
+      "type": ["string", "null"],
+      "description": "Path to case artwork, relative to design directory"
+    },
+    "wallpaper_artwork": {
+      "type": ["string", "null"],
+      "description": "Path to wallpaper artwork, relative to design directory"
+    },
+    "case_fit_mode": {
+      "type": "string",
+      "enum": ["cover", "contain", "tile"],
+      "default": "cover"
+    },
+    "focal_point": {
+      "type": "array",
+      "items": {"type": "number", "minimum": 0, "maximum": 1},
+      "minItems": 2,
+      "maxItems": 2,
+      "default": [0.5, 0.5],
+      "description": "[x, y] normalized focal point for artwork fitting"
+    },
+    "tags": {
+      "type": "array",
+      "items": {"type": "string"},
+      "default": []
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}

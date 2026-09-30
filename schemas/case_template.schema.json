@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "case_template.schema.json",
+  "title": "Case Template",
+  "description": "Defines a reusable phone case template: device x case_type x view",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "device_id", "case_type", "view", "canvas", "print_region", "layers"],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Template schema version. Must be 1 for Phase 1."
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]*$",
+      "description": "Template ID, e.g. 'iphone-17e__hard__rear'"
+    },
+    "device_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]*$",
+      "description": "Device registry ID, e.g. 'iphone-17e'"
+    },
+    "case_type": {
+      "type": "string",
+      "enum": ["hard", "tough", "magsafe", "transparent", "soft"],
+      "description": "Case material/type"
+    },
+    "view": {
+      "type": "string",
+      "enum": ["rear", "angle", "front", "closeup"],
+      "description": "Camera view angle"
+    },
+    "canvas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height"],
+      "properties": {
+        "width": {"type": "integer", "minimum": 100, "maximum": 8000},
+        "height": {"type": "integer", "minimum": 100, "maximum": 8000}
+      }
+    },
+    "print_region": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "x", "y", "width", "height", "fit"],
+      "properties": {
+        "mode": {"type": "string", "enum": ["mask", "quad"]},
+        "x": {"type": "integer", "minimum": 0},
+        "y": {"type": "integer", "minimum": 0},
+        "width": {"type": "integer", "minimum": 1},
+        "height": {"type": "integer", "minimum": 1},
+        "fit": {"type": "string", "enum": ["cover", "contain", "tile"]},
+        "mask": {"type": ["string", "null"]}
+      }
+    },
+    "layers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type"],
+        "properties": {
+          "type": {"type": "string", "enum": ["base", "artwork", "highlight", "overlay", "shadow"]},
+          "file": {"type": ["string", "null"]},
+          "blend": {"type": "string", "enum": ["normal", "multiply", "screen", "overlay", "darken", "lighten"]},
+          "opacity": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    }
+  }
+}

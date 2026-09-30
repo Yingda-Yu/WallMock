@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "availability.schema.json",
+  "title": "Variant Availability",
+  "description": "Maps design x device x case_type to inventory availability",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["variant_id", "design_id", "device_id", "case_type", "available"],
+    "properties": {
+      "variant_id": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9_-]*__[a-z0-9][a-z0-9_-]*__[a-z0-9][a-z0-9_-]*$",
+        "description": "Format: design_id__device_id__case_type"
+      },
+      "design_id": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9_-]*$"
+      },
+      "device_id": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9_-]*$"
+      },
+      "case_type": {
+        "type": "string",
+        "enum": ["hard", "tough", "magsafe", "transparent", "soft"]
+      },
+      "available": {
+        "type": "boolean"
+      },
+      "supplier_sku": {
+        "type": ["string", "null"]
+      },
+      "supplier_id": {
+        "type": ["string", "null"]
+      }
+    }
+  }
+}
