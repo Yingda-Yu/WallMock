@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "id": "case-only-design",
+  "display_name": "Case Only Design",
+  "case_artwork": "case.png",
+  "case_fit_mode": "contain",
+  "focal_point": [0.3, 0.4],
+  "tags": [],
+  "active": true
+}

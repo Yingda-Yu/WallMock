@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "id": "test-device__hard__rear",
+  "device_id": "test-device",
+  "case_type": "hard",
+  "view": "rear",
+  "canvas": {
+    "width": 1600,
+    "height": 2000
+  },
+  "print_region": {
+    "mode": "mask",
+    "x": 200,
+    "y": 150,
+    "width": 1200,
+    "height": 1700,
+    "fit": "cover",
+    "mask": "print_mask.png"
+  },
+  "layers": [
+    {"type": "base", "file": "base.png"},
+    {"type": "artwork", "blend": "normal"},
+    {"type": "highlight", "file": "highlight.png", "opacity": 1.0},
+    {"type": "overlay", "file": "overlay.png"},
+    {"type": "shadow", "file": "shadow.png"}
+  ]
+}

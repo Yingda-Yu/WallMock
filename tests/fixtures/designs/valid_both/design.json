@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "id": "sample-design",
+  "display_name": "Sample Design",
+  "case_artwork": "case.png",
+  "wallpaper_artwork": "wallpaper.png",
+  "case_fit_mode": "cover",
+  "focal_point": [0.5, 0.5],
+  "tags": ["blue", "floral"],
+  "active": true
+}

@@ -1,0 +1,18 @@
+[
+  {
+    "variant_id": "sample-design__test-device__hard",
+    "design_id": "sample-design",
+    "device_id": "test-device",
+    "case_type": "hard",
+    "available": true,
+    "supplier_sku": "SKU-001",
+    "supplier_id": "supplier-a"
+  },
+  {
+    "variant_id": "case-only-design__test-device__hard",
+    "design_id": "case-only-design",
+    "device_id": "test-device",
+    "case_type": "hard",
+    "available": false
+  }
+]

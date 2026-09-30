@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "id": "wallpaper-only-design",
+  "display_name": "Wallpaper Only Design",
+  "wallpaper_artwork": "wallpaper.png",
+  "tags": ["abstract"],
+  "active": false
+}
