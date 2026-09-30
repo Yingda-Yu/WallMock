@@ -33,6 +33,30 @@ def _load_layer_png(filename: str, template_dir: Path) -> Image.Image:
     return Image.open(str(path)).convert("RGBA")
 
 
+def _load_mask(filename: str, template_dir: Path) -> Image.Image:
+    """Load a mask layer as an L-mode (grayscale) image.
+
+    Masks are typically saved as L-mode PNGs where pixel values
+    represent coverage (0=transparent, 255=opaque). Converting to RGBA
+    would put these values in the RGB channels with alpha=255, losing
+    the mask semantics. We keep the mask in L mode so it can be used
+    directly as an alpha channel in compositing.
+    """
+    path = template_dir / filename
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Template mask not found: {path}"
+        )
+    img = Image.open(str(path))
+    if img.mode == "L":
+        return img
+    if img.mode == "LA":
+        return img.getchannel("A")
+    if img.mode == "RGBA":
+        return img.getchannel("A")
+    return img.convert("L")
+
+
 def _apply_opacity(img: Image.Image, opacity: float) -> Image.Image:
     """Scale an image's alpha channel by *opacity* (0.0–1.0)."""
     if opacity >= 1.0:
@@ -54,18 +78,18 @@ def _clip_artwork_to_mask(
 ) -> Image.Image:
     """Place fitted artwork on a canvas-sized layer and clip it to *mask*.
 
-    Both artwork and mask are composited onto a full-canvas transparent
-    image so that the mask can clip the artwork at the exact pixel level,
-    including camera cutouts and edge feathering.
+    The mask is an L-mode image where pixel values represent coverage
+    (0=fully excluded, 255=fully included). Both artwork and mask are
+    composited onto a full-canvas transparent image so that the mask can
+    clip the artwork at the exact pixel level, including camera cutouts
+    and edge feathering.
     """
-    # Create full-canvas artwork layer
     artwork_layer = Image.new("RGBA", (canvas_w, canvas_h), (0, 0, 0, 0))
     artwork_layer.paste(artwork, (paste_x, paste_y), artwork)
 
-    # Clip: multiply alpha channels
     art_alpha = artwork_layer.getchannel("A")
-    mask_alpha = mask.getchannel("A")
-    clipped_alpha = ImageChops.multiply(art_alpha, mask_alpha)
+    mask_l = mask if mask.mode == "L" else mask.getchannel("A")
+    clipped_alpha = ImageChops.multiply(art_alpha, mask_l)
     artwork_layer.putalpha(clipped_alpha)
 
     return artwork_layer
@@ -121,7 +145,7 @@ def render_case(
     # Load print mask once (needed for artwork layer)
     print_mask = None
     if template.print_region.mask:
-        print_mask = _load_layer_png(template.print_region.mask, tpl_dir)
+        print_mask = _load_mask(template.print_region.mask, tpl_dir)
 
     # Process layers in order
     for layer in template.layers:
@@ -164,7 +188,7 @@ def render_case(
             result = Image.alpha_composite(result, artwork_layer)
 
         elif layer.type == "highlight":
-            if layer.file:
+            if layer.file and (tpl_dir / layer.file).exists():
                 hl_img = _load_layer_png(layer.file, tpl_dir)
                 hl_img = _apply_opacity(hl_img, layer.opacity)
                 result = Image.alpha_composite(result, hl_img)
@@ -176,7 +200,7 @@ def render_case(
                 result = Image.alpha_composite(result, ov_img)
 
         elif layer.type == "shadow":
-            if layer.file:
+            if layer.file and (tpl_dir / layer.file).exists():
                 sh_img = _load_layer_png(layer.file, tpl_dir)
                 sh_img = _apply_opacity(sh_img, layer.opacity)
                 result = Image.alpha_composite(result, sh_img)
