@@ -1,3 +1,5 @@
 {
-  "templates": []
+  "templates": [
+    {"path": "apple/iphone-17e/hard/rear/template.json"}
+  ]
 }
