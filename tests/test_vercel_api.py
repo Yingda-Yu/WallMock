@@ -28,14 +28,14 @@ img.save(buf, format='JPEG', quality=85)
 img_b64 = 'data:image/jpeg;base64,' + base64.b64encode(buf.getvalue()).decode()
 
 resp = client.post('/api/preview', json={
-    'template_id': 'single_phone',
+    'template_id': 'phone_hero',
     'images': [{'base64': img_b64, 'filename': 'test.jpg'}],
     'options': {
         'background_color': '#F5F2EB',
-        'canvas_width': 1500,
-        'canvas_height': 2000,
+        'canvas_width': 2400,
+        'canvas_height': 2400,
         'lockscreen': {'show': True, 'time': '9:42', 'date': '1月13日', 'auto_color': True},
-        'brand': {'show_brand': True, 'name': 'Test', 'subtitle': 'SUB', 'show_subtitle': True}
+        'brand': {'mode': 'minimal', 'show_brand': False, 'show_subtitle': False}
     }
 })
 data = resp.get_json()
@@ -48,17 +48,17 @@ else:
 
 # Test 4: generate
 resp = client.post('/api/generate', json={
-    'template_id': 'single_phone',
+    'template_id': 'phone_hero',
     'images': [{'base64': img_b64, 'filename': 'test.jpg'}],
     'product_name': 'testproduct',
     'options': {
         'background_color': '#F5F2EB',
-        'canvas_width': 1500,
-        'canvas_height': 2000,
+        'canvas_width': 2400,
+        'canvas_height': 2400,
         'output_format': 'JPEG',
         'output_quality': 95,
         'lockscreen': {'show': True, 'time': '9:42', 'date': '1月13日', 'auto_color': True},
-        'brand': {'show_brand': True, 'name': 'Test', 'subtitle': 'SUB', 'show_subtitle': True}
+        'brand': {'mode': 'minimal', 'show_brand': False, 'show_subtitle': False}
     }
 })
 data = resp.get_json()

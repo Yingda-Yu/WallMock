@@ -46,8 +46,11 @@ print(f"   推荐模板: {result.get('recommended_templates')}")
 
 print("\n4. 测试单手机模板预览...")
 resp = client.post('/api/preview', json={
-    'template_id': 'single_phone',
-    'options': {}
+    'template_id': 'phone_hero',
+    'options': {
+        'canvas_width': 2400,
+        'canvas_height': 2400,
+    }
 })
 result = resp.get_json()
 print(f"   状态: {resp.status_code}, 成功: {result.get('success')}")
@@ -56,18 +59,23 @@ if result.get('success'):
 
 print("\n5. 测试多设备组合预览...")
 resp = client.post('/api/preview', json={
-    'template_id': 'all_devices',
-    'options': {}
+    'template_id': 'device_trio',
+    'options': {
+        'canvas_width': 2400,
+        'canvas_height': 2400,
+    }
 })
 result = resp.get_json()
 print(f"   状态: {resp.status_code}, 成功: {result.get('success')}")
 
 print("\n6. 测试生成图片...")
 resp = client.post('/api/generate', json={
-    'template_id': 'single_phone',
+    'template_id': 'phone_hero',
     'product_name': '测试商品',
     'options': {
         'background_color': '#F5F2EB',
+        'canvas_width': 2400,
+        'canvas_height': 2400,
         'output_format': 'JPEG',
         'output_quality': 95,
     }
@@ -78,10 +86,13 @@ if result.get('success'):
     print(f"   输出路径: {result.get('output_path')}")
     print(f"   文件大小: {result.get('file_size_kb')} KB")
 
-print("\n7. 测试六手机模板预览...")
+print("\n7. 测试壁纸合集模板预览...")
 resp = client.post('/api/preview', json={
-    'template_id': 'phone_pack_6',
-    'options': {}
+    'template_id': 'wallpaper_collection',
+    'options': {
+        'canvas_width': 2400,
+        'canvas_height': 2400,
+    }
 })
 result = resp.get_json()
 print(f"   状态: {resp.status_code}, 成功: {result.get('success')}")

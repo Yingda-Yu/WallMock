@@ -13,43 +13,52 @@ def hex_to_rgb(h):
 
 test_wp_portrait = Image.new("RGB", (1080, 2400), hex_to_rgb("#FFE4B5"))
 test_wp_landscape = Image.new("RGB", (1920, 1080), hex_to_rgb("#87CEEB"))
+test_wp_square = Image.new("RGB", (1080, 1080), hex_to_rgb("#DDA0DD"))
 
-print("测试单手机模板...")
-result = render_template("single_phone", [test_wp_portrait])
-result.convert("RGB").convert("RGB").save("output/test/test_single_phone.jpg", "JPEG", quality=95)
-print("  单手机 OK:", result.size)
+DEFAULT_OPTS = {
+    "background_color": "#F5F2EB",
+    "bg_mode": "gradient",
+    "canvas_width": 2400,
+    "canvas_height": 2400,
+    "lockscreen": {"show": True, "time": "9:42", "date": "1月13日", "auto_color": True},
+    "brand": {"mode": "minimal", "show_brand": False, "show_subtitle": False},
+}
 
-print("测试双手机模板...")
-result = render_template("double_phone", [test_wp_portrait, test_wp_portrait])
-result.convert("RGB").save("output/test/test_double_phone.jpg", "JPEG", quality=95)
-print("  双手机 OK:", result.size)
+print("测试 Phone Hero...")
+result = render_template("phone_hero", [test_wp_portrait], DEFAULT_OPTS)
+result.convert("RGB").save("output/test/test_phone_hero.jpg", "JPEG", quality=95)
+print("  Phone Hero OK:", result.size)
 
-print("测试六手机模板...")
-colors = ["#FFB6C1", "#98FB98", "#ADD8E6", "#DDA0DD", "#F0E68C", "#FFA07A"]
-imgs = [Image.new("RGB", (1080, 2400), hex_to_rgb(c)) for c in colors]
-result = render_template("phone_pack_6", imgs)
-result.convert("RGB").save("output/test/test_phone_pack_6.jpg", "JPEG", quality=95)
-print("  六手机 OK:", result.size)
+print("测试 Desktop Hero...")
+result = render_template("desktop_hero", [test_wp_landscape], DEFAULT_OPTS)
+result.convert("RGB").save("output/test/test_desktop_hero.jpg", "JPEG", quality=95)
+print("  Desktop Hero OK:", result.size)
 
-print("测试笔记本加手机...")
-result = render_template("laptop_phone", [test_wp_landscape, test_wp_portrait])
+print("测试 Tablet Hero...")
+result = render_template("tablet_hero", [test_wp_portrait], DEFAULT_OPTS)
+result.convert("RGB").save("output/test/test_tablet_hero.jpg", "JPEG", quality=95)
+print("  Tablet Hero OK:", result.size)
+
+print("测试 Laptop + Phone...")
+result = render_template("laptop_phone", [test_wp_landscape, test_wp_portrait], DEFAULT_OPTS)
 result.convert("RGB").save("output/test/test_laptop_phone.jpg", "JPEG", quality=95)
-print("  笔记本加手机 OK:", result.size)
+print("  Laptop + Phone OK:", result.size)
 
-print("测试多设备组合...")
-imgs4 = [
-    test_wp_landscape,
-    test_wp_landscape,
-    Image.new("RGB", (1536, 2048), hex_to_rgb("#DDA0DD")),
-    test_wp_portrait
-]
-result = render_template("all_devices", imgs4)
-result.convert("RGB").save("output/test/test_all_devices.jpg", "JPEG", quality=95)
-print("  多设备 OK:", result.size)
+print("测试 Device Trio...")
+imgs3 = [test_wp_landscape, test_wp_square, test_wp_portrait]
+result = render_template("device_trio", imgs3, DEFAULT_OPTS)
+result.convert("RGB").save("output/test/test_device_trio.jpg", "JPEG", quality=95)
+print("  Device Trio OK:", result.size)
 
-print("测试桌面展示...")
-result = render_template("desktop", [test_wp_landscape])
-result.convert("RGB").save("output/test/test_desktop.jpg", "JPEG", quality=95)
-print("  桌面展示 OK:", result.size)
+print("测试 Wallpaper Collection...")
+imgs4 = [test_wp_portrait, test_wp_square, test_wp_landscape, test_wp_portrait]
+result = render_template("wallpaper_collection", imgs4, DEFAULT_OPTS)
+result.convert("RGB").save("output/test/test_wallpaper_collection.jpg", "JPEG", quality=95)
+print("  Wallpaper Collection OK:", result.size)
+
+print("测试 Phone Ratio Compare...")
+result = render_template("phone_ratio_compare", [test_wp_portrait], DEFAULT_OPTS)
+result.convert("RGB").save("output/test/test_phone_ratio_compare.jpg", "JPEG", quality=95)
+print("  Phone Ratio Compare OK:", result.size)
 
 print("\n所有模板测试完成！结果在 output/test/ 目录下")
