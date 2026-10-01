@@ -6,6 +6,25 @@
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "id", "device_id", "case_type", "view", "canvas", "print_region", "layers"],
+  "if": {
+    "properties": { "status": { "const": "production" } },
+    "required": ["status"]
+  },
+  "then": {
+    "required": ["provenance"],
+    "properties": {
+      "provenance": {
+        "properties": {
+          "supplier_geometry": {
+            "not": {
+              "pattern": "^(?i)(none|n/?a|unknown|tbd|tbc|pending|provisional|placeholder|prototype|best[ -]?effort|approximate|estimated|visual[ -]?estimate|reference only|not (yet|available|production)|none yet)\\b",
+              "description": "Production templates must have an actual supplier geometry reference (dieline, CAD file, SKU, etc.), not a non-production sentinel like 'none', 'n/a', 'unknown', or 'prototype'."
+            }
+          }
+        }
+      }
+    }
+  },
   "properties": {
     "schema_version": {
       "type": "integer",
@@ -35,7 +54,7 @@
     "status": {
       "type": "string",
       "enum": ["prototype", "production"],
-      "description": "Template status. Defaults to 'prototype' when omitted — legacy templates are never silently promoted to production."
+      "description": "Template status. Defaults to 'prototype' when omitted — legacy templates are never silently promoted to production. Production status requires provenance with production-grade supplier_geometry."
     },
     "provenance": {
       "type": "object",
@@ -57,7 +76,7 @@
         },
         "supplier_geometry": {
           "type": "string",
-          "description": "Supplier-provided case geometry source (dieline, CAD file, supplier SKU). Set to 'none' for prototype templates."
+          "description": "Supplier-provided case geometry source (dieline, CAD file, supplier SKU). Set to 'none — not a production SKU template' for prototype templates. Must reference actual geometry for production status."
         }
       }
     },

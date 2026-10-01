@@ -100,6 +100,63 @@ TEMPLATE_STATUS_PROTOTYPE = "prototype"
 TEMPLATE_STATUS_PRODUCTION = "production"
 VALID_TEMPLATE_STATUSES = (TEMPLATE_STATUS_PROTOTYPE, TEMPLATE_STATUS_PRODUCTION)
 
+# Lowercased supplier_geometry values that indicate non-production geometry.
+# Any of these sentinels (case-insensitive) means the template does NOT have
+# actual supplier-accurate geometry and cannot be marked "production".
+NON_PRODUCTION_SUPPLIER_SENTINELS = frozenset({
+    "none",
+    "n/a",
+    "na",
+    "unknown",
+    "tbd",
+    "tbc",
+    "none yet",
+    "not yet",
+    "not available",
+    "pending",
+    "provisional",
+    "placeholder",
+    "reference only",
+    "approximate",
+    "estimated",
+    "best effort",
+    "best-effort",
+    "visual estimate",
+    "visually estimated",
+    "not a production",
+    "not production",
+    "prototype only",
+    "prototype",
+})
+
+
+def is_production_grade_supplier_geometry(value: str) -> bool:
+    """Return True if ``value`` indicates actual production-grade geometry.
+
+    A value is production-grade when it is a non-empty string that does
+    not match any known non-production sentinel (case-insensitive,
+    leading/trailing whitespace ignored).
+
+    The check is intentionally conservative — a sentinel is a clear
+    marker of non-production status. Any other value (a file path,
+    SKU reference, supplier name, CAD/dieline reference, etc.) is
+    treated as a potential production geometry reference.
+    """
+    if not isinstance(value, str):
+        return False
+    stripped = value.strip().lower()
+    if not stripped:
+        return False
+    # Exact match against known sentinels
+    if stripped in NON_PRODUCTION_SUPPLIER_SENTINELS:
+        return False
+    # Also check if the value STARTS with a sentinel word
+    # (e.g. "none — not a production SKU")
+    for sentinel in NON_PRODUCTION_SUPPLIER_SENTINELS:
+        if stripped.startswith(sentinel):
+            return False
+    return True
+
 
 @dataclass(frozen=True)
 class CaseTemplate:

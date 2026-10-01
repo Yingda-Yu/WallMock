@@ -26,10 +26,12 @@ from .catalog_models import (
     CatalogValidationError,
     Design,
     Device,
+    is_production_grade_supplier_geometry,
     PrintRegion,
+    TEMPLATE_STATUS_PRODUCTION,
+    TEMPLATE_STATUS_PROTOTYPE,
     TemplateProvenance,
     VALID_TEMPLATE_STATUSES,
-    TEMPLATE_STATUS_PROTOTYPE,
     VariantAvailability,
 )
 
@@ -226,6 +228,26 @@ def load_case_template(path) -> CaseTemplate:
             assumed_case_parameters=provenance_raw["assumed_case_parameters"],
             supplier_geometry=provenance_raw["supplier_geometry"],
         )
+
+    # Cross-field: production status requires production-grade supplier geometry.
+    # A template may only be "production" when provenance.supplier_geometry
+    # references actual supplier-accurate geometry (dieline, CAD, SKU, etc.).
+    # Non-production sentinels like "none", "n/a", "unknown" are rejected.
+    if status == TEMPLATE_STATUS_PRODUCTION:
+        if provenance is None:
+            raise CatalogValidationError(
+                f"{file_path}: status='production' requires a 'provenance' "
+                f"object with production-grade supplier_geometry. "
+                f"Production templates must reference actual supplier "
+                f"geometry (dieline, CAD, SKU, etc.)."
+            )
+        if not is_production_grade_supplier_geometry(provenance.supplier_geometry):
+            raise CatalogValidationError(
+                f"{file_path}: status='production' requires production-grade "
+                f"supplier_geometry, got '{provenance.supplier_geometry}'. "
+                f"Non-production sentinels (none, n/a, unknown, prototype, "
+                f"etc.) are not valid for production templates."
+            )
 
     # schema_version
     sv = raw["schema_version"]

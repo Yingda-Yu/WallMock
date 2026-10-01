@@ -325,13 +325,184 @@ class TestTemplateStatusAndProvenance:
         tpl = loader.load_case_template(path)
         assert tpl.status == "prototype"
 
-    def test_production_status_round_trips(self, tmp_path):
-        """status='production' is preserved through load_case_template()."""
+    def test_production_status_round_trips_with_valid_supplier_geometry(self, tmp_path):
+        """status='production' is accepted when provenance has production-grade
+        supplier_geometry (e.g. a real dieline/CAD/SKU reference)."""
         data = _valid_template_data()
         data["status"] = "production"
+        data["provenance"] = {
+            "verified_device_dimensions": "146.7 x 71.5 x 7.80 mm (Apple official spec)",
+            "estimated_device_anchors": "camera layout, corner radius (supplier confirmed)",
+            "assumed_case_parameters": "1.5mm case thickness (supplier confirmed)",
+            "supplier_geometry": "Supplier SKU WM-IP17E-HRD-001 (dieline v2.3, CAD file IP17E_hard_rear.step)",
+        }
         path = write_json(tmp_path / "t.json", data)
         tpl = loader.load_case_template(path)
         assert tpl.status == "production"
+        assert tpl.provenance is not None
+        assert tpl.provenance.supplier_geometry.startswith("Supplier SKU")
+
+    # --- Production eligibility: allowed cases ---
+
+    def test_prototype_without_provenance_allowed(self, tmp_path):
+        """prototype + no provenance → allowed (default case)."""
+        data = _valid_template_data()
+        # No status, no provenance
+        assert "status" not in data
+        assert "provenance" not in data
+        path = write_json(tmp_path / "t.json", data)
+        tpl = loader.load_case_template(path)
+        assert tpl.status == "prototype"
+        assert tpl.provenance is None
+
+    def test_prototype_with_supplier_geometry_none_allowed(self, tmp_path):
+        """prototype + supplier_geometry='none' → allowed."""
+        data = _valid_template_data()
+        data["status"] = "prototype"
+        data["provenance"] = {
+            "verified_device_dimensions": "A",
+            "estimated_device_anchors": "B",
+            "assumed_case_parameters": "C",
+            "supplier_geometry": "none",
+        }
+        path = write_json(tmp_path / "t.json", data)
+        tpl = loader.load_case_template(path)
+        assert tpl.status == "prototype"
+        assert tpl.provenance.supplier_geometry == "none"
+
+    def test_prototype_with_supplier_geometry_none_dash_allowed(self, tmp_path):
+        """prototype + supplier_geometry='none — not a production SKU' → allowed."""
+        data = _valid_template_data()
+        data["status"] = "prototype"
+        data["provenance"] = {
+            "verified_device_dimensions": "A",
+            "estimated_device_anchors": "B",
+            "assumed_case_parameters": "C",
+            "supplier_geometry": "none — not a production SKU template",
+        }
+        path = write_json(tmp_path / "t.json", data)
+        tpl = loader.load_case_template(path)
+        assert tpl.status == "prototype"
+
+    # --- Production eligibility: rejected cases ---
+
+    def test_production_without_provenance_rejected(self, tmp_path):
+        """production + no provenance → rejected."""
+        data = _valid_template_data()
+        data["status"] = "production"
+        # No provenance at all
+        assert "provenance" not in data
+        path = write_json(tmp_path / "t.json", data)
+        with pytest.raises(CatalogValidationError,
+                           match="status='production'.*requires.*provenance"):
+            loader.load_case_template(path)
+
+    def test_production_with_supplier_geometry_none_rejected(self, tmp_path):
+        """production + supplier_geometry='none' → rejected."""
+        data = _valid_template_data()
+        data["status"] = "production"
+        data["provenance"] = {
+            "verified_device_dimensions": "A",
+            "estimated_device_anchors": "B",
+            "assumed_case_parameters": "C",
+            "supplier_geometry": "none",
+        }
+        path = write_json(tmp_path / "t.json", data)
+        with pytest.raises(CatalogValidationError,
+                           match="status='production'.*production-grade.*supplier_geometry"):
+            loader.load_case_template(path)
+
+    def test_production_with_supplier_geometry_na_rejected(self, tmp_path):
+        """production + supplier_geometry='n/a' → rejected."""
+        data = _valid_template_data()
+        data["status"] = "production"
+        data["provenance"] = {
+            "verified_device_dimensions": "A",
+            "estimated_device_anchors": "B",
+            "assumed_case_parameters": "C",
+            "supplier_geometry": "n/a",
+        }
+        path = write_json(tmp_path / "t.json", data)
+        with pytest.raises(CatalogValidationError,
+                           match="status='production'.*production-grade"):
+            loader.load_case_template(path)
+
+    def test_production_with_supplier_geometry_unknown_rejected(self, tmp_path):
+        """production + supplier_geometry='unknown' → rejected."""
+        data = _valid_template_data()
+        data["status"] = "production"
+        data["provenance"] = {
+            "verified_device_dimensions": "A",
+            "estimated_device_anchors": "B",
+            "assumed_case_parameters": "C",
+            "supplier_geometry": "unknown",
+        }
+        path = write_json(tmp_path / "t.json", data)
+        with pytest.raises(CatalogValidationError,
+                           match="status='production'.*production-grade"):
+            loader.load_case_template(path)
+
+    def test_production_with_supplier_geometry_prototype_rejected(self, tmp_path):
+        """production + supplier_geometry='prototype only' → rejected."""
+        data = _valid_template_data()
+        data["status"] = "production"
+        data["provenance"] = {
+            "verified_device_dimensions": "A",
+            "estimated_device_anchors": "B",
+            "assumed_case_parameters": "C",
+            "supplier_geometry": "prototype only — reference geometry",
+        }
+        path = write_json(tmp_path / "t.json", data)
+        with pytest.raises(CatalogValidationError,
+                           match="status='production'.*production-grade"):
+            loader.load_case_template(path)
+
+    def test_production_with_supplier_geometry_none_dash_rejected(self, tmp_path):
+        """production + supplier_geometry='none — not a production SKU' → rejected."""
+        data = _valid_template_data()
+        data["status"] = "production"
+        data["provenance"] = {
+            "verified_device_dimensions": "A",
+            "estimated_device_anchors": "B",
+            "assumed_case_parameters": "C",
+            "supplier_geometry": "none — not a production SKU template",
+        }
+        path = write_json(tmp_path / "t.json", data)
+        with pytest.raises(CatalogValidationError,
+                           match="status='production'.*production-grade"):
+            loader.load_case_template(path)
+
+    def test_production_with_missing_supplier_geometry_rejected(self, tmp_path):
+        """production + provenance without supplier_geometry field → rejected."""
+        data = _valid_template_data()
+        data["status"] = "production"
+        data["provenance"] = {
+            "verified_device_dimensions": "A",
+            "estimated_device_anchors": "B",
+            "assumed_case_parameters": "C",
+            # missing supplier_geometry
+        }
+        path = write_json(tmp_path / "t.json", data)
+        # Rejected as missing required provenance field
+        with pytest.raises(CatalogValidationError,
+                           match="provenance.*missing required"):
+            loader.load_case_template(path)
+
+    def test_production_with_real_dieline_accepted(self, tmp_path):
+        """production + explicit dieline/CAD reference → accepted."""
+        data = _valid_template_data()
+        data["status"] = "production"
+        data["provenance"] = {
+            "verified_device_dimensions": "146.7 x 71.5 x 7.80 mm (Apple official spec)",
+            "estimated_device_anchors": "measured from supplier STEP file",
+            "assumed_case_parameters": "from supplier BOM spec",
+            "supplier_geometry": "Dieline v3.1 — supplier PN 810-12345-A, CAD: IP17E_hard_rear_2025.step",
+        }
+        path = write_json(tmp_path / "t.json", data)
+        tpl = loader.load_case_template(path)
+        assert tpl.status == "production"
+        assert "Dieline" in tpl.provenance.supplier_geometry
+        assert "step" in tpl.provenance.supplier_geometry.lower()
 
     def test_missing_status_defaults_to_prototype(self, tmp_path):
         """Missing status defaults to prototype — never silently production."""
