@@ -4,6 +4,13 @@
   "device_id": "iphone-17e",
   "case_type": "hard",
   "view": "rear",
+  "status": "prototype",
+  "provenance": {
+    "verified_device_dimensions": "146.7 x 71.5 x 7.80 mm (Apple official spec)",
+    "estimated_device_anchors": "camera layout, corner radius, button positions (visually estimated)",
+    "assumed_case_parameters": "1.5mm case thickness, 1.5mm print bezel (prototype assumptions)",
+    "supplier_geometry": "none — not a production SKU template"
+  },
   "canvas": {
     "width": 1600,
     "height": 2000
@@ -18,10 +25,10 @@
     "mask": "print_mask.png"
   },
   "layers": [
+    {"type": "shadow", "file": "shadow.png"},
     {"type": "base", "file": "base.png"},
     {"type": "artwork", "blend": "normal"},
     {"type": "highlight", "file": "highlight.png", "opacity": 1.0},
-    {"type": "overlay", "file": "overlay.png"},
-    {"type": "shadow", "file": "shadow.png"}
+    {"type": "overlay", "file": "overlay.png"}
   ]
 }

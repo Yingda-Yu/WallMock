@@ -1,5 +1,8 @@
 import requests
 import json
+import pytest
+
+pytestmark = pytest.mark.integration  # requires running Flask server
 
 BASE_URL = "http://localhost:5876"
 

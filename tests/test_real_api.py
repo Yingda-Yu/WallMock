@@ -1,6 +1,9 @@
 import os
 import requests
+import pytest
 from PIL import Image, ImageDraw, ImageFont
+
+pytestmark = pytest.mark.integration  # requires running Flask server
 
 SERVER_URL = "http://127.0.0.1:5876"
 LOG_DIR = "logs"

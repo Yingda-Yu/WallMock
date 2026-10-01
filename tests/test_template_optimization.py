@@ -2,9 +2,8 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from PIL import Image
+from PIL import Image, ImageDraw
 from core.template_engine import render_template, list_templates
-from core.image_loader import load_image
 
 def create_test_image(width, height, color=(200, 180, 160)):
     img = Image.new("RGBA", (width, height), color + (255,))

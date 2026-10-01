@@ -174,7 +174,8 @@ def load_case_template(path) -> CaseTemplate:
     _check_no_unknown(
         raw,
         {"schema_version", "id", "device_id", "case_type", "view",
-         "canvas", "print_region", "layers"},
+         "canvas", "print_region", "layers",
+         "status", "provenance"},
         file_path, "template root",
     )
     _require_fields(
@@ -183,6 +184,19 @@ def load_case_template(path) -> CaseTemplate:
          "canvas", "print_region", "layers"},
         file_path, "template root",
     )
+
+    # status (optional — defaults to "production" for backward compat)
+    status = raw.get("status", "production")
+    _check_type(status, str, "status", file_path)
+
+    # provenance (optional — geometry provenance metadata)
+    provenance = raw.get("provenance")
+    if provenance is not None:
+        if not isinstance(provenance, dict):
+            raise CatalogValidationError(
+                f"{file_path}: provenance: expected object, got {type(provenance).__name__}"
+            )
+        # provenance fields are free-form metadata — no strict validation
 
     # schema_version
     sv = raw["schema_version"]

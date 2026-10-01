@@ -7,6 +7,36 @@ from PIL import Image, ImageDraw
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 
+def pytest_configure(config):
+    """Register custom markers."""
+    config.addinivalue_line(
+        "markers",
+        "integration: tests that require a running server or external service"
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    """Skip integration tests by default unless --run-integration is passed."""
+    if config.getoption("--run-integration"):
+        return
+    skip_integration = pytest.mark.skip(
+        reason="integration test — pass --run-integration to run"
+    )
+    for item in items:
+        if "integration" in item.keywords:
+            item.add_marker(skip_integration)
+
+
+def pytest_addoption(parser):
+    """Add --run-integration CLI option."""
+    parser.addoption(
+        "--run-integration",
+        action="store_true",
+        default=False,
+        help="run integration tests that require a live server",
+    )
+
+
 def _make_wallpaper(width, height, color, label=""):
     """Create a small deterministic test wallpaper with a visible pattern."""
     img = Image.new("RGB", (width, height), color)
