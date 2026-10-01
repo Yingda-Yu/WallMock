@@ -78,6 +78,30 @@ class CaseTemplateLayer:
 
 
 @dataclass(frozen=True)
+class TemplateProvenance:
+    """Structured geometry provenance for a case template.
+
+    Classifies where each piece of template geometry comes from,
+    so consumers can judge accuracy and production-readiness.
+
+    A template should only have ``status="production"`` when
+    ``supplier_geometry`` references an actual supplier dieline/CAD.
+    """
+    verified_device_dimensions: str
+    estimated_device_anchors: str
+    assumed_case_parameters: str
+    supplier_geometry: str
+
+
+# Valid template status values.
+# "prototype" — reference / best-effort geometry, not production-grade
+# "production" — supplier-accurate dieline/CAD geometry, safe for publishing
+TEMPLATE_STATUS_PROTOTYPE = "prototype"
+TEMPLATE_STATUS_PRODUCTION = "production"
+VALID_TEMPLATE_STATUSES = (TEMPLATE_STATUS_PROTOTYPE, TEMPLATE_STATUS_PRODUCTION)
+
+
+@dataclass(frozen=True)
 class CaseTemplate:
     """A reusable case template representing ``device x case_type x view``.
 
@@ -91,6 +115,8 @@ class CaseTemplate:
     canvas: Canvas
     print_region: PrintRegion
     layers: List[CaseTemplateLayer]
+    status: str = TEMPLATE_STATUS_PROTOTYPE
+    provenance: Optional[TemplateProvenance] = None
 
 
 # ---------------------------------------------------------------------------

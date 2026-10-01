@@ -27,6 +27,9 @@ from .catalog_models import (
     Design,
     Device,
     PrintRegion,
+    TemplateProvenance,
+    VALID_TEMPLATE_STATUSES,
+    TEMPLATE_STATUS_PROTOTYPE,
     VariantAvailability,
 )
 
@@ -185,18 +188,44 @@ def load_case_template(path) -> CaseTemplate:
         file_path, "template root",
     )
 
-    # status (optional — defaults to "production" for backward compat)
-    status = raw.get("status", "production")
+    # status (optional — defaults to "prototype" for safety)
+    # Legacy templates without an explicit status are treated as prototype
+    # so they can never silently become production-grade.
+    status = raw.get("status", TEMPLATE_STATUS_PROTOTYPE)
     _check_type(status, str, "status", file_path)
+    _check_enum(status, set(VALID_TEMPLATE_STATUSES), "status", file_path)
 
-    # provenance (optional — geometry provenance metadata)
-    provenance = raw.get("provenance")
-    if provenance is not None:
-        if not isinstance(provenance, dict):
+    # provenance (optional — structured geometry provenance metadata)
+    provenance = None
+    provenance_raw = raw.get("provenance")
+    if provenance_raw is not None:
+        if not isinstance(provenance_raw, dict):
             raise CatalogValidationError(
-                f"{file_path}: provenance: expected object, got {type(provenance).__name__}"
+                f"{file_path}: provenance: expected object, "
+                f"got {type(provenance_raw).__name__}"
             )
-        # provenance fields are free-form metadata — no strict validation
+        _check_no_unknown(
+            provenance_raw,
+            {"verified_device_dimensions", "estimated_device_anchors",
+             "assumed_case_parameters", "supplier_geometry"},
+            file_path, "provenance",
+        )
+        _require_fields(
+            provenance_raw,
+            {"verified_device_dimensions", "estimated_device_anchors",
+             "assumed_case_parameters", "supplier_geometry"},
+            file_path, "provenance",
+        )
+        for field in ("verified_device_dimensions", "estimated_device_anchors",
+                      "assumed_case_parameters", "supplier_geometry"):
+            val = provenance_raw[field]
+            _check_type(val, str, f"provenance.{field}", file_path)
+        provenance = TemplateProvenance(
+            verified_device_dimensions=provenance_raw["verified_device_dimensions"],
+            estimated_device_anchors=provenance_raw["estimated_device_anchors"],
+            assumed_case_parameters=provenance_raw["assumed_case_parameters"],
+            supplier_geometry=provenance_raw["supplier_geometry"],
+        )
 
     # schema_version
     sv = raw["schema_version"]
@@ -335,6 +364,8 @@ def load_case_template(path) -> CaseTemplate:
         canvas=canvas,
         print_region=print_region,
         layers=layers,
+        status=status,
+        provenance=provenance,
     )
 
 

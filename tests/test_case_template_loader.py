@@ -26,6 +26,7 @@ from core.catalog_models import (
     CatalogValidationError,
     Design,
     PrintRegion,
+    TemplateProvenance,
     VariantAvailability,
 )
 from core import case_template_loader as loader
@@ -307,6 +308,172 @@ class TestLoadCaseTemplateInvalid:
         path = write_json(tmp_path / "t.json", data)
         with pytest.raises(CatalogValidationError, match="not a safe relative path"):
             loader.load_case_template(path)
+
+
+# ---------------------------------------------------------------------------
+# Case template — status and provenance metadata
+# ---------------------------------------------------------------------------
+
+class TestTemplateStatusAndProvenance:
+    """Tests for status + provenance round-trip, validation, and defaults."""
+
+    def test_prototype_status_round_trips(self, tmp_path):
+        """status='prototype' is preserved through load_case_template()."""
+        data = _valid_template_data()
+        data["status"] = "prototype"
+        path = write_json(tmp_path / "t.json", data)
+        tpl = loader.load_case_template(path)
+        assert tpl.status == "prototype"
+
+    def test_production_status_round_trips(self, tmp_path):
+        """status='production' is preserved through load_case_template()."""
+        data = _valid_template_data()
+        data["status"] = "production"
+        path = write_json(tmp_path / "t.json", data)
+        tpl = loader.load_case_template(path)
+        assert tpl.status == "production"
+
+    def test_missing_status_defaults_to_prototype(self, tmp_path):
+        """Missing status defaults to prototype — never silently production."""
+        data = _valid_template_data()
+        # No "status" key at all
+        assert "status" not in data
+        path = write_json(tmp_path / "t.json", data)
+        tpl = loader.load_case_template(path)
+        assert tpl.status == "prototype"
+        # Explicitly confirm it is NOT production
+        assert tpl.status != "production"
+
+    def test_invalid_status_is_rejected(self, tmp_path):
+        """Invalid status values are rejected by the loader."""
+        data = _valid_template_data()
+        data["status"] = "experimental"
+        path = write_json(tmp_path / "t.json", data)
+        with pytest.raises(CatalogValidationError, match="status.*not valid"):
+            loader.load_case_template(path)
+
+    def test_status_wrong_type_rejected(self, tmp_path):
+        """Non-string status is rejected."""
+        data = _valid_template_data()
+        data["status"] = 123
+        path = write_json(tmp_path / "t.json", data)
+        with pytest.raises(CatalogValidationError, match="status.*expected str"):
+            loader.load_case_template(path)
+
+    def test_provenance_round_trips_and_is_typed(self, tmp_path):
+        """Provenance is preserved and returned as TemplateProvenance dataclass."""
+        data = _valid_template_data()
+        data["status"] = "prototype"
+        data["provenance"] = {
+            "verified_device_dimensions": "146.7 x 71.5 x 7.80 mm (Apple official spec)",
+            "estimated_device_anchors": "camera layout, corner radius (visually estimated)",
+            "assumed_case_parameters": "1.5mm case thickness (prototype assumptions)",
+            "supplier_geometry": "none — not a production SKU template",
+        }
+        path = write_json(tmp_path / "t.json", data)
+        tpl = loader.load_case_template(path)
+
+        # Provenance is preserved and is the correct type
+        assert tpl.provenance is not None
+        assert isinstance(tpl.provenance, TemplateProvenance)
+
+        # All four fields round-trip correctly
+        assert tpl.provenance.verified_device_dimensions == \
+            "146.7 x 71.5 x 7.80 mm (Apple official spec)"
+        assert tpl.provenance.estimated_device_anchors == \
+            "camera layout, corner radius (visually estimated)"
+        assert tpl.provenance.assumed_case_parameters == \
+            "1.5mm case thickness (prototype assumptions)"
+        assert tpl.provenance.supplier_geometry == \
+            "none — not a production SKU template"
+
+    def test_provenance_is_frozen(self, tmp_path):
+        """TemplateProvenance is immutable (frozen dataclass)."""
+        data = _valid_template_data()
+        data["provenance"] = {
+            "verified_device_dimensions": "A",
+            "estimated_device_anchors": "B",
+            "assumed_case_parameters": "C",
+            "supplier_geometry": "D",
+        }
+        path = write_json(tmp_path / "t.json", data)
+        tpl = loader.load_case_template(path)
+        with pytest.raises(AttributeError):
+            tpl.provenance.verified_device_dimensions = "changed"
+
+    def test_provenance_missing_without_status_is_none(self, tmp_path):
+        """If neither status nor provenance is set, provenance is None."""
+        data = _valid_template_data()
+        path = write_json(tmp_path / "t.json", data)
+        tpl = loader.load_case_template(path)
+        assert tpl.provenance is None
+
+    def test_provenance_unknown_field_rejected(self, tmp_path):
+        """Unknown fields inside provenance are rejected."""
+        data = _valid_template_data()
+        data["provenance"] = {
+            "verified_device_dimensions": "A",
+            "estimated_device_anchors": "B",
+            "assumed_case_parameters": "C",
+            "supplier_geometry": "D",
+            "extra_field": "should fail",
+        }
+        path = write_json(tmp_path / "t.json", data)
+        with pytest.raises(CatalogValidationError, match="provenance.*unknown field"):
+            loader.load_case_template(path)
+
+    def test_provenance_missing_required_field_rejected(self, tmp_path):
+        """Missing required provenance fields are rejected."""
+        data = _valid_template_data()
+        data["provenance"] = {
+            "verified_device_dimensions": "A",
+            "estimated_device_anchors": "B",
+            "assumed_case_parameters": "C",
+            # missing supplier_geometry
+        }
+        path = write_json(tmp_path / "t.json", data)
+        with pytest.raises(CatalogValidationError, match="provenance.*missing required"):
+            loader.load_case_template(path)
+
+    def test_provenance_wrong_type_rejected(self, tmp_path):
+        """Non-object provenance is rejected."""
+        data = _valid_template_data()
+        data["provenance"] = "not-an-object"
+        path = write_json(tmp_path / "t.json", data)
+        with pytest.raises(CatalogValidationError, match="provenance.*expected object"):
+            loader.load_case_template(path)
+
+    def test_iphone_17e_template_has_prototype_status(self):
+        """The checked-in iPhone 17e template satisfies schema semantics:
+        status=prototype with complete provenance metadata.
+        """
+        import sys
+        from pathlib import Path
+        tpl_path = Path(__file__).resolve().parent.parent / \
+            "assets" / "case_templates" / "apple" / "iphone-17e" / \
+            "hard" / "rear" / "template.json"
+        tpl = loader.load_case_template(str(tpl_path))
+
+        # Status is prototype
+        assert tpl.status == "prototype"
+
+        # Provenance is present and typed
+        assert tpl.provenance is not None
+        assert isinstance(tpl.provenance, TemplateProvenance)
+
+        # All four provenance fields are non-empty strings
+        assert isinstance(tpl.provenance.verified_device_dimensions, str)
+        assert len(tpl.provenance.verified_device_dimensions) > 0
+        assert isinstance(tpl.provenance.estimated_device_anchors, str)
+        assert len(tpl.provenance.estimated_device_anchors) > 0
+        assert isinstance(tpl.provenance.assumed_case_parameters, str)
+        assert len(tpl.provenance.assumed_case_parameters) > 0
+        assert isinstance(tpl.provenance.supplier_geometry, str)
+        assert len(tpl.provenance.supplier_geometry) > 0
+
+        # Supplier geometry confirms it is NOT production
+        assert "not a production" in tpl.provenance.supplier_geometry.lower() or \
+            tpl.provenance.supplier_geometry.lower().startswith("none")
 
 
 # ---------------------------------------------------------------------------

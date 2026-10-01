@@ -32,6 +32,35 @@
       "enum": ["rear", "angle", "front", "closeup"],
       "description": "Camera view angle"
     },
+    "status": {
+      "type": "string",
+      "enum": ["prototype", "production"],
+      "description": "Template status. Defaults to 'prototype' when omitted — legacy templates are never silently promoted to production."
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["verified_device_dimensions", "estimated_device_anchors", "assumed_case_parameters", "supplier_geometry"],
+      "description": "Structured geometry provenance — classifies where each piece of template geometry comes from.",
+      "properties": {
+        "verified_device_dimensions": {
+          "type": "string",
+          "description": "Officially verified device body dimensions (e.g. from manufacturer spec pages)."
+        },
+        "estimated_device_anchors": {
+          "type": "string",
+          "description": "Visually estimated device features (camera layout, corner radius, button positions, etc.)."
+        },
+        "assumed_case_parameters": {
+          "type": "string",
+          "description": "Prototype assumptions about case construction (thickness, print bezel, etc.)."
+        },
+        "supplier_geometry": {
+          "type": "string",
+          "description": "Supplier-provided case geometry source (dieline, CAD file, supplier SKU). Set to 'none' for prototype templates."
+        }
+      }
+    },
     "canvas": {
       "type": "object",
       "additionalProperties": false,
