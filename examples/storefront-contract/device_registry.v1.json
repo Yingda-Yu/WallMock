@@ -1,0 +1,16 @@
+{
+  "contract": "spartina-device-render-catalog",
+  "contract_version": 1,
+  "devices": [
+    {
+      "active_identity": true,
+      "aliases": [],
+      "brand": "apple",
+      "device_id": "iphone-17e",
+      "display_name": "iPhone 17e",
+      "family": "iphone",
+      "generation": "17",
+      "sort_order": 17050
+    }
+  ]
+}

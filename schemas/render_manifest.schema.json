@@ -1,0 +1,127 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "render_manifest.schema.json",
+  "title": "Render Manifest",
+  "description": "Describes what WallMock HAS rendered. Each variant has views with rendered assets at specific widths. Asset paths are authoritative — storefront must not construct URLs from IDs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract", "contract_version", "generated_at", "wallmock_commit", "renderer_version", "variants"],
+  "properties": {
+    "contract": {
+      "type": "string",
+      "const": "spartina-device-render-catalog"
+    },
+    "contract_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "generated_at": {
+      "type": "string",
+      "description": "UTC RFC3339 timestamp of when this manifest was generated."
+    },
+    "wallmock_commit": {
+      "type": "string",
+      "description": "Git SHA of the WallMock build that generated this manifest."
+    },
+    "renderer_version": {
+      "type": "string",
+      "description": "Semantic version of the renderer that produced these assets."
+    },
+    "variants": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["variant_id", "design_id", "device_id", "case_type", "template_id", "template_status", "views"],
+        "properties": {
+          "variant_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*__[a-z0-9][a-z0-9-]*__[a-z]+$"
+          },
+          "design_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "device_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "case_type": {
+            "type": "string",
+            "enum": ["hard", "tough", "magsafe", "clear", "soft"]
+          },
+          "template_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*__[a-z]+__[a-z]+$"
+          },
+          "template_status": {
+            "type": "string",
+            "enum": ["prototype", "production"]
+          },
+          "views": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "description": "Map of width (as string key) to render asset record.",
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["render_asset_id", "path", "width", "height", "format", "content_hash", "view", "template_id", "template_status", "production_publishable", "renderer_version"],
+                "properties": {
+                  "render_asset_id": {
+                    "type": "string",
+                    "description": "Opaque deterministic asset ID. Store as-is, do not parse for business semantics."
+                  },
+                  "path": {
+                    "type": "string",
+                    "description": "Authoritative relative POSIX path to the rendered asset. Storefront must NOT construct URLs from IDs — always use this path."
+                  },
+                  "width": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "height": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "format": {
+                    "type": "string",
+                    "description": "File format/extension (e.g. 'webp')."
+                  },
+                  "content_hash": {
+                    "type": "string",
+                    "pattern": "^sha256:[0-9a-f]{64}$",
+                    "description": "SHA-256 content hash in 'sha256:<hex>' format. Covers rendered asset bytes."
+                  },
+                  "view": {
+                    "type": "string",
+                    "enum": ["rear", "angle", "front", "closeup"]
+                  },
+                  "template_id": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9][a-z0-9-]*__[a-z]+__[a-z]+$"
+                  },
+                  "template_status": {
+                    "type": "string",
+                    "enum": ["prototype", "production"]
+                  },
+                  "production_publishable": {
+                    "type": "boolean",
+                    "description": "Whether this asset is safe for production publishing. Must match template status/provenance."
+                  },
+                  "renderer_version": {
+                    "type": "string"
+                  },
+                  "wallmock_commit": {
+                    "type": "string",
+                    "description": "Optional per-asset commit override. Usually matches manifest-level wallmock_commit."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

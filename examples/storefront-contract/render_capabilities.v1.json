@@ -1,0 +1,23 @@
+{
+  "contract": "spartina-device-render-catalog",
+  "contract_version": 1,
+  "devices": {
+    "iphone-17e": {
+      "device_id": "iphone-17e",
+      "templates": [
+        {
+          "case_type": "hard",
+          "production_publishable": false,
+          "provenance": {
+            "supplier_geometry": "none — not a production SKU template"
+          },
+          "renderable": true,
+          "template_id": "iphone-17e__hard__rear",
+          "template_status": "prototype",
+          "view": "rear"
+        }
+      ]
+    }
+  },
+  "wallmock_commit": "a205d43e02c65200634d50ad6ea5a4a9a30ac82a"
+}

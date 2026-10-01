@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "device_registry.schema.json",
+  "title": "Device Registry",
+  "description": "Canonical device identity registry shared between WallMock and storefront.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract", "contract_version", "devices"],
+  "properties": {
+    "contract": {
+      "type": "string",
+      "const": "spartina-device-render-catalog"
+    },
+    "contract_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "devices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["device_id", "brand", "family", "display_name"],
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "description": "Lowercase kebab-case. Must not contain '__' (composite separator)."
+          },
+          "brand": {
+            "type": "string",
+            "minLength": 1
+          },
+          "family": {
+            "type": "string",
+            "minLength": 1
+          },
+          "generation": {
+            "type": "string",
+            "description": "Generation label for grouping (e.g. '17', '16')."
+          },
+          "display_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "aliases": {
+            "type": "array",
+            "items": {"type": "string"},
+            "default": []
+          },
+          "sort_order": {
+            "type": "integer",
+            "default": 0
+          },
+          "active_identity": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether this identity is active in the shared catalog. Not a storefront sellability flag."
+          }
+        }
+      }
+    }
+  }
+}

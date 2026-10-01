@@ -1,0 +1,34 @@
+{
+  "contract": "spartina-device-render-catalog",
+  "contract_version": 1,
+  "generated_at": "2026-10-01T14:36:56Z",
+  "renderer_version": "1.0.0",
+  "variants": {
+    "color-block__iphone-17e__hard": {
+      "case_type": "hard",
+      "design_id": "color-block",
+      "device_id": "iphone-17e",
+      "template_id": "iphone-17e__hard__rear",
+      "template_status": "prototype",
+      "variant_id": "color-block__iphone-17e__hard",
+      "views": {
+        "rear": {
+          "800": {
+            "content_hash": "sha256:738dfde9e68672a685e833cc4857e31e0783d6162d62ccc8af44b0c765c2a420",
+            "format": "webp",
+            "height": 1000,
+            "path": "assets/color-block/iphone-17e/hard/rear-800.webp",
+            "production_publishable": false,
+            "render_asset_id": "color-block__iphone-17e__hard__rear__w800",
+            "renderer_version": "1.0.0",
+            "template_id": "iphone-17e__hard__rear",
+            "template_status": "prototype",
+            "view": "rear",
+            "width": 800
+          }
+        }
+      }
+    }
+  },
+  "wallmock_commit": "a205d43e02c65200634d50ad6ea5a4a9a30ac82a"
+}

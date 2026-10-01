@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "contract_bundle.schema.json",
+  "title": "Contract Bundle Index",
+  "description": "Atomic handoff bundle index. References all contract artifacts with SHA-256 hashes for integrity verification.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract", "contract_version", "wallmock_commit", "renderer_version", "generated_at", "artifacts"],
+  "properties": {
+    "contract": {
+      "type": "string",
+      "const": "spartina-device-render-catalog"
+    },
+    "contract_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "wallmock_commit": {
+      "type": "string"
+    },
+    "renderer_version": {
+      "type": "string"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "working_tree_dirty": {
+      "type": ["boolean", "null"],
+      "description": "Whether the working tree had uncommitted changes at export time. Null = unknown."
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["filename", "sha256"],
+        "properties": {
+          "filename": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "description": "SHA-256 hex digest of the artifact file content."
+          }
+        }
+      }
+    }
+  }
+}
