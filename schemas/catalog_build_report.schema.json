@@ -1,0 +1,131 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Catalog Build Report",
+  "description": "Machine-readable report from a catalog build operation.",
+  "type": "object",
+  "required": [
+    "schema_version", "success", "mode", "total_assets",
+    "generated", "skipped_unchanged", "skipped_publish_gate",
+    "errors", "output_dir"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "description": "Schema version for the build report format.",
+      "const": 1
+    },
+    "success": {
+      "type": "boolean",
+      "description": "Whether the build completed successfully."
+    },
+    "mode": {
+      "type": "string",
+      "description": "Build mode used.",
+      "enum": ["preview", "publish"]
+    },
+    "total_assets": {
+      "type": "integer",
+      "description": "Total number of assets in the plan.",
+      "minimum": 0
+    },
+    "generated": {
+      "type": "integer",
+      "description": "Number of assets newly generated.",
+      "minimum": 0
+    },
+    "skipped_unchanged": {
+      "type": "integer",
+      "description": "Number of assets skipped because they were unchanged (incremental cache hit).",
+      "minimum": 0
+    },
+    "skipped_publish_gate": {
+      "type": "integer",
+      "description": "Number of assets skipped because they failed the publish gate (prototype in publish mode).",
+      "minimum": 0
+    },
+    "errors": {
+      "type": "array",
+      "description": "List of error messages if build failed.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "output_dir": {
+      "type": "string",
+      "description": "Absolute or relative path to the output directory."
+    },
+    "variants": {
+      "type": "array",
+      "description": "List of variant build details.",
+      "items": {
+        "type": "object",
+        "required": ["variant_id", "design_id", "device_id", "case_type", "assets"],
+        "additionalProperties": false,
+        "properties": {
+          "variant_id": {
+            "type": "string"
+          },
+          "design_id": {
+            "type": "string"
+          },
+          "device_id": {
+            "type": "string"
+          },
+          "case_type": {
+            "type": "string"
+          },
+          "assets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path", "view", "width", "height", "status", "fingerprint"],
+              "additionalProperties": false,
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "view": {
+                  "type": "string"
+                },
+                "width": {
+                  "type": "integer"
+                },
+                "height": {
+                  "type": "integer"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["generated", "skipped_unchanged", "skipped_publish_gate", "error"]
+                },
+                "fingerprint": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "bundle": {
+      "type": "object",
+      "description": "Contract bundle information if generated.",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "valid": {
+          "type": "boolean"
+        }
+      }
+    },
+    "build_duration_seconds": {
+      "type": "number",
+      "description": "Total build duration in seconds.",
+      "minimum": 0
+    }
+  }
+}
