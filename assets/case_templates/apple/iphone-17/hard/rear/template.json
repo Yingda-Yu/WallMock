@@ -7,7 +7,7 @@
   "status": "prototype",
   "provenance": {
     "verified_device_dimensions": "149.6 x 71.5 x 7.95 mm (Apple official spec — apple.com/iphone-17/specs/)",
-    "estimated_device_anchors": "dual camera layout (diagonal), corner radius, button positions (visually estimated from Apple product imagery)",
+    "estimated_device_anchors": "48MP Dual Fusion — vertically stacked dual camera (main top, ultrawide bottom), flash + mic to right, corner radius, button positions (visually estimated from Apple product imagery)",
     "assumed_case_parameters": "1.5mm case thickness, 1.5mm print bezel (prototype hard-case assumptions)",
     "supplier_geometry": "none — not a production SKU template"
   },
@@ -46,5 +46,11 @@
       "type": "overlay",
       "file": "overlay.png"
     }
-  ]
+  ],
+  "camera_region": {
+    "x": 436,
+    "y": 159,
+    "w": 263,
+    "h": 304
+  }
 }

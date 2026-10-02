@@ -180,6 +180,7 @@ class CaseTemplate:
     layers: List[CaseTemplateLayer]
     status: str = TEMPLATE_STATUS_PROTOTYPE
     provenance: Optional[TemplateProvenance] = None
+    camera_region: Optional[dict] = None
 
 
 # ---------------------------------------------------------------------------

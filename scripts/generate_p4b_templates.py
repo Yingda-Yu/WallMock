@@ -233,6 +233,81 @@ def generate_device_template(config):
         img = Image.new("RGBA", (canvas_w, canvas_h), (0, 0, 0, 0))
         d = ImageDraw.Draw(img)
 
+        # Plateau (for air_plateau camera type): raised horizontal platform
+        if "plateau" in cam_config:
+            plat = cam_config["plateau"]
+            plat_w = plat["right"] - plat["left"]
+            plat_h = plat["bottom"] - plat["top"]
+            plat_r = plat_h // 2  # fully rounded pill shape
+
+            # Plateau shadow (subtle depth beneath)
+            plat_shadow = Image.new("L", (canvas_w, canvas_h), 0)
+            ps = ImageDraw.Draw(plat_shadow)
+            ps.rounded_rectangle(
+                [plat["left"] + 2, plat["top"] + 4,
+                 plat["right"] + 2, plat["bottom"] + 4],
+                radius=plat_r,
+                fill=70
+            )
+            plat_shadow = plat_shadow.filter(ImageFilter.GaussianBlur(4))
+            plat_shadow_img = Image.new("RGBA", (canvas_w, canvas_h), (0, 0, 0, 0))
+            plat_shadow_img.paste(
+                Image.new("RGBA", (canvas_w, canvas_h), (0, 0, 0, 100)),
+                (0, 0), plat_shadow
+            )
+            img = Image.alpha_composite(img, plat_shadow_img)
+
+            # Plateau body (matte glass / metallic surface)
+            plateau_base = Image.new("RGBA", (canvas_w, canvas_h), (0, 0, 0, 0))
+            pb = ImageDraw.Draw(plateau_base)
+            pb.rounded_rectangle(
+                [plat["left"], plat["top"], plat["right"], plat["bottom"]],
+                radius=plat_r,
+                fill=(165, 163, 160, 255)
+            )
+            # Subtle top-to-bottom gradient on plateau
+            yy, xx = np.mgrid[0:canvas_h, 0:canvas_w].astype(np.float32)
+            plat_ymid = (plat["top"] + plat["bottom"]) / 2
+            plat_norm = ((yy - plat_ymid) / (plat_h / 2)).clip(-1, 1)
+            grad_factor = (1.0 - plat_norm * 0.15).clip(0, 1)
+            # Apply gradient to plateau pixels only
+            plat_mask = Image.new("L", (canvas_w, canvas_h), 0)
+            pm = ImageDraw.Draw(plat_mask)
+            pm.rounded_rectangle(
+                [plat["left"], plat["top"], plat["right"], plat["bottom"]],
+                radius=plat_r,
+                fill=255
+            )
+            plat_mask_arr = np.array(plat_mask, dtype=np.float32) / 255
+            plat_arr = np.array(plateau_base, dtype=np.float32)
+            for c in range(3):
+                plat_arr[..., c] *= grad_factor
+            plat_arr = plat_arr.clip(0, 255).astype(np.uint8)
+            plateau_base = Image.fromarray(plat_arr, "RGBA")
+            # Mask to plateau shape
+            plateau_base.putalpha(plat_mask)
+            img = Image.alpha_composite(img, plateau_base)
+
+            # Plateau outer rim highlight
+            d.rounded_rectangle(
+                [plat["left"], plat["top"], plat["right"], plat["bottom"]],
+                radius=plat_r,
+                outline=(195, 193, 190, 220), width=2
+            )
+            # Plateau inner shadow (recessed edge feel)
+            inner_edge = Image.new("L", (canvas_w, canvas_h), 0)
+            ie = ImageDraw.Draw(inner_edge)
+            ie.rounded_rectangle(
+                [plat["left"] + 4, plat["top"] + 4,
+                 plat["right"] - 4, plat["bottom"] - 4],
+                radius=plat_r - 4,
+                outline=100, width=2
+            )
+            inner_edge = inner_edge.filter(ImageFilter.GaussianBlur(2.0))
+            inner_edge_img = Image.new("RGBA", (canvas_w, canvas_h), (0, 0, 0, 0))
+            inner_edge_img.putalpha(inner_edge)
+            img = Image.alpha_composite(img, inner_edge_img)
+
         # Camera components
         for comp in cam_config["components"]:
             if comp["type"] == "lens":
@@ -460,57 +535,66 @@ def generate_device_template(config):
             "width": print_w,
             "height": print_h,
         },
+        "camera_region": cam_config.get("region"),
     }
 
 
 def _camera_config(camera_type, case_x, case_y, case_w, case_h):
-    """Return camera component layout for the given camera type."""
+    """Return camera component layout for the given camera type.
 
-    if camera_type == "dual":
-        # iPhone 17 style: dual camera diagonally arranged, upper-left
-        # Main lens (larger, lower-right), ultrawide (smaller, upper-left)
-        main_lens_radius = 62      # ~4.8mm
-        uw_lens_radius = 48        # ~3.7mm
+    Camera types:
+    - single: iPhone 17e style, single lens + flash + mic
+    - dual_vertical: iPhone 17 style, vertically stacked dual camera
+      (main on top, ultrawide below), flash+mic to the right
+    - air_plateau: iPhone Air style, single lens + flash on a
+      horizontally extended raised plateau (side-to-side)
+    """
+
+    if camera_type == "dual_vertical":
+        # iPhone 17: vertically stacked dual camera
+        # 48MP Dual Fusion — main (top) + ultrawide (bottom)
+        # Both lenses in a vertical column, flash + mic to the right
+        main_lens_radius = 60      # ~4.6mm main lens
+        uw_lens_radius = 50        # ~3.8mm ultrawide
         ring_width = 12
-        cam_spacing = 140          # distance between lens centers
+        lens_spacing = 130         # vertical distance between lens centers
 
-        # Diagonal placement: main lower-right, ultrawide upper-left
-        center_x = case_x + int(case_w * 0.26)
-        center_y = case_y + int(case_h * 0.14)
+        # Lens column: centered vertically in upper camera region
+        lens_cx = case_x + int(case_w * 0.22)
+        top_lens_cy = case_y + int(case_h * 0.11)
+        bottom_lens_cy = top_lens_cy + lens_spacing
 
-        # Main lens (bottom-right of pair)
-        angle = math.radians(45)
-        main_cx = int(center_x + cam_spacing / 2 * math.cos(angle))
-        main_cy = int(center_y + cam_spacing / 2 * math.sin(angle))
+        # Flash: to the right of the lens column, aligned with top lens
+        flash_cx = lens_cx + 130
+        flash_cy = top_lens_cy + 5
+        flash_size = 42
 
-        # Ultrawide lens (top-left of pair)
-        uw_cx = int(center_x - cam_spacing / 2 * math.cos(angle))
-        uw_cy = int(center_y - cam_spacing / 2 * math.sin(angle))
-
-        # Flash: to the right of the camera pair
-        flash_cx = main_cx + 110
-        flash_cy = main_cy - 40
-        flash_size = 44
-
-        # Mic: below flash
-        mic_cx = flash_cx
-        mic_cy = main_cy + 40
+        # Mic: below flash, roughly between the two lenses vertically
+        mic_cx = flash_cx + 5
+        mic_cy = bottom_lens_cy - 10
         mic_radius = 11
 
         return {
             "exclude_pad": 18,
+            # Camera region bbox for geometry-aware crops
+            "region": {
+                "x": lens_cx - main_lens_radius - ring_width - 20,
+                "y": top_lens_cy - main_lens_radius - ring_width - 20,
+                "w": (flash_cx + flash_size // 2 + 20) - (lens_cx - main_lens_radius - ring_width - 20),
+                "h": (bottom_lens_cy + uw_lens_radius + ring_width + 20) - (top_lens_cy - main_lens_radius - ring_width - 20),
+            },
             "components": [
                 {
                     "type": "lens",
-                    "cx": main_cx,
-                    "cy": main_cy,
+                    "cx": lens_cx,
+                    "cy": top_lens_cy,
                     "radius": main_lens_radius,
                     "ring_width": ring_width,
                 },
                 {
                     "type": "lens",
-                    "cx": uw_cx,
-                    "cy": uw_cy,
+                    "cx": lens_cx,
+                    "cy": bottom_lens_cy,
                     "radius": uw_lens_radius,
                     "ring_width": ring_width,
                 },
@@ -529,26 +613,48 @@ def _camera_config(camera_type, case_x, case_y, case_w, case_h):
             ],
         }
 
-    elif camera_type == "air_single":
-        # iPhone Air style: single larger camera, upper-left, thin body
-        lens_radius = 68      # ~5.2mm (Air has slightly larger single lens)
+    elif camera_type == "air_plateau":
+        # iPhone Air: single lens + flash on a horizontally extended plateau
+        # The camera sits on a raised plateau that extends side-to-side
+        # across the upper-left portion of the phone
+        lens_radius = 65      # ~5.0mm main lens
         ring_width = 12
+        plateau_pad = 22      # padding around lens+flash for plateau
 
-        lens_cx = case_x + int(case_w * 0.24)
-        lens_cy = case_y + int(case_h * 0.125)
+        # Lens position: upper-left region
+        lens_cx = case_x + int(case_w * 0.23)
+        lens_cy = case_y + int(case_h * 0.12)
 
-        # Flash: to the right, slightly above
-        flash_cx = lens_cx + 150
-        flash_cy = lens_cy - 25
-        flash_size = 46
+        # Flash: to the right of lens, on the same plateau
+        flash_cx = lens_cx + 155
+        flash_cy = lens_cy + 2
+        flash_size = 44
 
-        # Mic: below flash
-        mic_cx = flash_cx
-        mic_cy = lens_cy + 60
-        mic_radius = 12
+        # Mic: to the right of flash
+        mic_cx = flash_cx + 65
+        mic_cy = lens_cy + 5
+        mic_radius = 11
+
+        # Plateau boundaries (for overlay rendering)
+        plateau_left = lens_cx - lens_radius - ring_width - plateau_pad
+        plateau_right = mic_cx + mic_radius + plateau_pad
+        plateau_top = lens_cy - lens_radius - ring_width - plateau_pad
+        plateau_bottom = lens_cy + lens_radius + ring_width + plateau_pad
 
         return {
             "exclude_pad": 18,
+            "region": {
+                "x": plateau_left - 5,
+                "y": plateau_top - 5,
+                "w": (plateau_right - plateau_left) + 10,
+                "h": (plateau_bottom - plateau_top) + 10,
+            },
+            "plateau": {
+                "left": plateau_left,
+                "right": plateau_right,
+                "top": plateau_top,
+                "bottom": plateau_bottom,
+            },
             "components": [
                 {
                     "type": "lens",
@@ -590,6 +696,12 @@ def _camera_config(camera_type, case_x, case_y, case_w, case_h):
 
         return {
             "exclude_pad": 18,
+            "region": {
+                "x": lens_cx - lens_radius - ring_width - 20,
+                "y": lens_cy - lens_radius - ring_width - 20,
+                "w": (flash_cx + flash_size // 2 + 20) - (lens_cx - lens_radius - ring_width - 20),
+                "h": (mic_cy + mic_radius + 20) - (lens_cy - lens_radius - ring_width - 20),
+            },
             "components": [
                 {
                     "type": "lens",
@@ -648,6 +760,10 @@ def write_template_json(out_dir, config):
         ],
     }
 
+    # Camera region (geometry-aware crops, review-time metadata only)
+    if config.get("_camera_region"):
+        template["camera_region"] = config["_camera_region"]
+
     # Write with stable sorted keys for deterministic output
     with open(os.path.join(out_dir, "template.json"), "w", encoding="utf-8") as f:
         json.dump(template, f, indent=2, ensure_ascii=False, sort_keys=False)
@@ -666,14 +782,14 @@ IPHONE_17_CONFIG = {
     "phone_h_mm": 149.6,
     "phone_d_mm": 7.95,
     "corner_r_mm": 12.0,
-    "camera_type": "dual",
+    "camera_type": "dual_vertical",
     "case_thickness_mm": 1.5,
     "bezel_mm": 1.5,
     "canvas_w": 1600,
     "canvas_h": 2050,
     "provenance": {
         "verified_device_dimensions": "149.6 x 71.5 x 7.95 mm (Apple official spec — apple.com/iphone-17/specs/)",
-        "estimated_device_anchors": "dual camera layout (diagonal), corner radius, button positions (visually estimated from Apple product imagery)",
+        "estimated_device_anchors": "48MP Dual Fusion — vertically stacked dual camera (main top, ultrawide bottom), flash + mic to right, corner radius, button positions (visually estimated from Apple product imagery)",
         "assumed_case_parameters": "1.5mm case thickness, 1.5mm print bezel (prototype hard-case assumptions)",
         "supplier_geometry": "none — not a production SKU template",
     },
@@ -687,14 +803,14 @@ IPHONE_AIR_CONFIG = {
     "phone_h_mm": 156.2,
     "phone_d_mm": 5.64,
     "corner_r_mm": 13.0,
-    "camera_type": "air_single",
+    "camera_type": "air_plateau",
     "case_thickness_mm": 1.2,
     "bezel_mm": 1.2,
     "canvas_w": 1650,
     "canvas_h": 2150,
     "provenance": {
         "verified_device_dimensions": "156.2 x 74.7 x 5.64 mm (Apple official spec — apple.com/iphone-air/specs/)",
-        "estimated_device_anchors": "single camera layout, corner radius, button positions (visually estimated from Apple product imagery)",
+        "estimated_device_anchors": "single main lens + flash + mic on horizontally extended raised plateau (side-to-side plateau), corner radius, button positions (visually estimated from Apple product imagery)",
         "assumed_case_parameters": "1.2mm case thickness, 1.2mm print bezel (slim prototype case assumptions for Air)",
         "supplier_geometry": "none — not a production SKU template",
     },
@@ -723,6 +839,9 @@ def main():
         config["_print_y"] = layers["print_region"]["y"]
         config["_print_w"] = layers["print_region"]["width"]
         config["_print_h"] = layers["print_region"]["height"]
+
+        # Store camera region for geometry-aware crops
+        config["_camera_region"] = layers["camera_region"]
 
         out_dir = os.path.join(
             "assets", "case_templates", "apple", device_id, "hard", "rear"

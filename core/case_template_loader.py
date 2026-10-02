@@ -180,7 +180,7 @@ def load_case_template(path) -> CaseTemplate:
         raw,
         {"schema_version", "id", "device_id", "case_type", "view",
          "canvas", "print_region", "layers",
-         "status", "provenance"},
+         "status", "provenance", "camera_region"},
         file_path, "template root",
     )
     _require_fields(
@@ -388,6 +388,7 @@ def load_case_template(path) -> CaseTemplate:
         layers=layers,
         status=status,
         provenance=provenance,
+        camera_region=raw.get("camera_region"),
     )
 
 

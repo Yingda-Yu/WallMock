@@ -17,6 +17,7 @@ Output structure:
 
 import os
 import sys
+import json
 
 from PIL import Image
 
@@ -42,16 +43,32 @@ ARTWORKS = [
 OUTPUT_BASE = os.path.join("tests", "fixtures", "review_outputs", "p4b")
 
 
-def generate_crops(img, device_id):
-    """Generate camera crop and four corner crops from a full render."""
+def generate_crops(img, device_id, camera_region=None):
+    """Generate camera crop and four corner crops from a full render.
+
+    If camera_region is provided (from template geometry), the camera crop
+    is tightly framed around the actual camera hardware + padding.
+    Otherwise falls back to a generic top-left percentage crop.
+    """
     w, h = img.size
 
     crops = {}
 
-    # Camera region: top-left ~25% of width, top ~25% of height
-    cam_w = int(w * 0.38)
-    cam_h = int(h * 0.28)
-    crops["camera"] = img.crop((0, 0, cam_w, cam_h))
+    # Camera region: geometry-aware if available, else generic fallback
+    if camera_region:
+        # Expand camera region by generous padding for context
+        pad_x = int(camera_region["w"] * 0.35)
+        pad_y = int(camera_region["h"] * 0.40)
+        cam_x0 = max(0, int(camera_region["x"]) - pad_x)
+        cam_y0 = max(0, int(camera_region["y"]) - pad_y)
+        cam_x1 = min(w, int(camera_region["x"] + camera_region["w"]) + pad_x)
+        cam_y1 = min(h, int(camera_region["y"] + camera_region["h"]) + pad_y)
+        crops["camera"] = img.crop((cam_x0, cam_y0, cam_x1, cam_y1))
+    else:
+        # Fallback: top-left ~25% of width, top ~25% of height
+        cam_w = int(w * 0.38)
+        cam_h = int(h * 0.28)
+        crops["camera"] = img.crop((0, 0, cam_w, cam_h))
 
     # Corner crops (25% of each dimension from each corner)
     corner_w = int(w * 0.30)
@@ -84,6 +101,11 @@ def main():
         template_json = os.path.join(template_dir, "template.json")
         template = load_case_template(template_json)
 
+        # Read raw template JSON for camera_region (geometry-aware crops)
+        with open(template_json, "r", encoding="utf-8") as f:
+            raw_template = json.load(f)
+        camera_region = raw_template.get("camera_region")
+
         out_dir = os.path.join(OUTPUT_BASE, device_id, "hard", "rear")
         os.makedirs(out_dir, exist_ok=True)
 
@@ -91,6 +113,8 @@ def main():
         print(f"  Template: {template.id}")
         print(f"  Canvas:   {template.canvas.width}x{template.canvas.height}")
         print(f"  Status:   {template.status}")
+        if camera_region:
+            print(f"  Camera region: {camera_region['w']}x{camera_region['h']} @ ({camera_region['x']},{camera_region['y']})")
 
         for art_name, art_path in ARTWORKS:
             art = Image.open(art_path).convert("RGBA")
@@ -103,8 +127,8 @@ def main():
             result.save(full_path)
             size_kb = os.path.getsize(full_path) / 1024
 
-            # Crops
-            crops = generate_crops(result, device_id)
+            # Crops (geometry-aware camera crop if camera_region available)
+            crops = generate_crops(result, device_id, camera_region=camera_region)
             for crop_name, crop_img in crops.items():
                 crop_path = os.path.join(out_dir, f"{art_name}-{crop_name}.png")
                 crop_img.save(crop_path)
