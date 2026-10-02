@@ -294,3 +294,211 @@ class TestWave1ContractBundle:
             bundle = json.load(f)
         assert bundle["contract_version"] == 1
         assert bundle["contract"] == "spartina-device-render-catalog"
+
+
+# ---------------------------------------------------------------------------
+# 7. iPhone Air plateau overlay — component visibility regression
+# ---------------------------------------------------------------------------
+
+class TestIPhoneAirPlateauOverlay:
+    """Regression tests for the iPhone Air full-width plateau.
+
+    Guards against the stale ImageDraw/alpha_composite lifecycle bug
+    where flash and mic were drawn with a stale ImageDraw context and
+    never appeared in the final overlay.
+    """
+
+    @pytest.fixture
+    def air_template(self):
+        os.chdir(REPO_ROOT)
+        return load_case_template(_template_path("iphone-air"))
+
+    @pytest.fixture
+    def air_overlay(self):
+        os.chdir(REPO_ROOT)
+        overlay_path = os.path.join(_template_dir("iphone-air"), "overlay.png")
+        return Image.open(overlay_path).convert("RGBA")
+
+    @pytest.fixture
+    def air_camera_region(self, air_template):
+        """Get the camera_region dict from the loaded template."""
+        assert air_template.camera_region is not None
+        cr = air_template.camera_region
+        # camera_region may be a dict or object — normalize to dict
+        if isinstance(cr, dict):
+            return {
+                "x": cr["x"],
+                "y": cr["y"],
+                "w": cr["width"] if "width" in cr else cr.get("w", 0),
+                "h": cr["height"] if "height" in cr else cr.get("h", 0),
+            }
+        return {
+            "x": cr.x,
+            "y": cr.y,
+            "w": cr.width,
+            "h": cr.height,
+        }
+
+    def test_flash_visible_in_overlay(self, air_overlay, air_camera_region):
+        """Flash pixel is non-transparent and light-colored at its config position."""
+        # Config: flash at cx = case_x + case_w * 0.62, cy = lens_cy - 4
+        # We sample within the camera region at the expected flash location
+        px = air_overlay.load()
+        # Sample several points across the flash area (right-center of region)
+        region_cx = air_camera_region["x"] + air_camera_region["w"] * 0.62
+        region_cy = air_camera_region["y"] + air_camera_region["h"] * 0.5
+        # Flash should be a light/cream color with full alpha
+        for dx in [-10, 0, 10]:
+            for dy in [-10, 0, 10]:
+                x = int(region_cx + dx)
+                y = int(region_cy + dy)
+                r, g, b, a = px[x, y]
+                assert a > 150, (
+                    f"Flash pixel at ({x},{y}) is transparent (alpha={a})"
+                )
+                # Flash is cream/light yellow-ish, not dark like lens
+                brightness = (r + g + b) / 3
+                assert brightness > 150, (
+                    f"Flash pixel at ({x},{y}) too dark (brightness={brightness})"
+                )
+
+    def test_mic_visible_in_overlay(self, air_overlay, air_camera_region):
+        """Mic pixel is non-transparent and dark at its config position."""
+        px = air_overlay.load()
+        # Mic at far right: 82% across the camera region
+        region_cx = air_camera_region["x"] + air_camera_region["w"] * 0.82
+        region_cy = air_camera_region["y"] + air_camera_region["h"] * 0.5
+        for dx in [-4, 0, 4]:
+            for dy in [-4, 0, 4]:
+                x = int(region_cx + dx)
+                y = int(region_cy + dy)
+                r, g, b, a = px[x, y]
+                assert a > 150, (
+                    f"Mic pixel at ({x},{y}) is transparent (alpha={a})"
+                )
+                # Mic is dark (near-black)
+                brightness = (r + g + b) / 3
+                assert brightness < 80, (
+                    f"Mic pixel at ({x},{y}) too bright (brightness={brightness})"
+                )
+
+    def test_lens_visible_in_overlay(self, air_overlay, air_camera_region):
+        """Lens is visible (dark with ring) at the left side of the plateau."""
+        px = air_overlay.load()
+        # Lens at ~22% across the camera region
+        region_cx = air_camera_region["x"] + air_camera_region["w"] * 0.22
+        region_cy = air_camera_region["y"] + air_camera_region["h"] * 0.5
+        # Center of lens should be very dark
+        r, g, b, a = px[int(region_cx), int(region_cy)]
+        assert a > 200, "Lens center is transparent"
+        brightness = (r + g + b) / 3
+        assert brightness < 60, f"Lens center too bright (brightness={brightness})"
+
+    def test_camera_region_contains_flash(self, air_template, air_camera_region):
+        """camera_region fully contains the flash component."""
+        # Flash position from config: cx = case_x + case_w * 0.62
+        # Flash size = 44, so half = 22
+        case_x = (air_template.canvas.width - int(
+            (74.7 + 2 * 1.2) * 13
+        )) // 2
+        # Use the camera region from template metadata
+        cr = air_camera_region
+        flash_cx = cr["x"] + cr["w"] * 0.62
+        flash_cy = cr["y"] + cr["h"] * 0.5
+        flash_half = 22 + 5  # size/2 + pad
+        assert flash_cx - flash_half >= cr["x"] - 5, (
+            "Flash left edge extends outside camera_region"
+        )
+        assert flash_cx + flash_half <= cr["x"] + cr["w"] + 5, (
+            "Flash right edge extends outside camera_region"
+        )
+        assert flash_cy - flash_half >= cr["y"] - 5, (
+            "Flash top edge extends outside camera_region"
+        )
+        assert flash_cy + flash_half <= cr["y"] + cr["h"] + 5, (
+            "Flash bottom edge extends outside camera_region"
+        )
+
+    def test_camera_region_contains_mic(self, air_template, air_camera_region):
+        """camera_region fully contains the mic component."""
+        cr = air_camera_region
+        mic_cx = cr["x"] + cr["w"] * 0.82
+        mic_cy = cr["y"] + cr["h"] * 0.5
+        mic_r = 11 + 5  # radius + pad
+        assert mic_cx - mic_r >= cr["x"] - 5, (
+            "Mic left edge extends outside camera_region"
+        )
+        assert mic_cx + mic_r <= cr["x"] + cr["w"] + 5, (
+            "Mic right edge extends outside camera_region"
+        )
+        assert mic_cy - mic_r >= cr["y"] - 5, (
+            "Mic top edge extends outside camera_region"
+        )
+        assert mic_cy + mic_r <= cr["y"] + cr["h"] + 5, (
+            "Mic bottom edge extends outside camera_region"
+        )
+
+    def test_camera_region_contains_lens(self, air_template, air_camera_region):
+        """camera_region fully contains the lens component."""
+        cr = air_camera_region
+        lens_cx = cr["x"] + cr["w"] * 0.22
+        lens_cy = cr["y"] + cr["h"] * 0.5
+        lens_r = 65 + 12 + 5  # radius + ring + pad
+        assert lens_cx - lens_r >= cr["x"] - 5, (
+            "Lens left edge extends outside camera_region"
+        )
+        assert lens_cx + lens_r <= cr["x"] + cr["w"] + 5, (
+            "Lens right edge extends outside camera_region"
+        )
+        assert lens_cy - lens_r >= cr["y"] - 5, (
+            "Lens top edge extends outside camera_region"
+        )
+        assert lens_cy + lens_r <= cr["y"] + cr["h"] + 5, (
+            "Lens bottom edge extends outside camera_region"
+        )
+
+    def test_plateau_spans_full_width(self, air_overlay, air_camera_region):
+        """The plateau spans nearly the full width of the camera region."""
+        cr = air_camera_region
+        # Plateau should cover >80% of the camera region width
+        # (full-width plateau with small side insets)
+        px = air_overlay.load()
+        mid_y = int(cr["y"] + cr["h"] * 0.5)
+        # Scan horizontally across the middle of the region
+        opaque_pixels = 0
+        for x in range(cr["x"], cr["x"] + cr["w"]):
+            _, _, _, a = px[x, mid_y]
+            if a > 50:
+                opaque_pixels += 1
+        coverage = opaque_pixels / cr["w"]
+        assert coverage > 0.9, (
+            f"Plateau only covers {coverage:.1%} of camera region width, "
+            "expected >90% (full-width plateau)"
+        )
+
+    def test_print_mask_excludes_plateau_area(self, air_template, air_camera_region):
+        """Print mask has near-zero printable area across the plateau center band."""
+        os.chdir(REPO_ROOT)
+        mask_path = os.path.join(_template_dir("iphone-air"), "print_mask.png")
+        mask = Image.open(mask_path).convert("L")
+        px = mask.load()
+        cr = air_camera_region
+
+        # Sample the center band of the plateau (middle 40% vertically)
+        # where the pill shape is fully rectangular — no rounded-end gaps
+        band_top = int(cr["y"] + cr["h"] * 0.3)
+        band_bottom = int(cr["y"] + cr["h"] * 0.7)
+
+        total = 0
+        printable = 0
+        for x in range(cr["x"], cr["x"] + cr["w"]):
+            for y in range(band_top, band_bottom):
+                total += 1
+                if px[x, y] > 128:
+                    printable += 1
+
+        ratio = printable / total
+        assert ratio < 0.01, (
+            f"Print mask has {ratio:.1%} printable pixels in plateau center band, "
+            "expected <1% (plateau should be excluded from print)"
+        )

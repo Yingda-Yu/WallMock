@@ -268,6 +268,7 @@ def generate_device_template(config):
                 (0, 0), plat_shadow
             )
             img = Image.alpha_composite(img, plat_shadow_img)
+            d = ImageDraw.Draw(img)
 
             # Plateau body (matte glass / metallic surface)
             plateau_base = Image.new("RGBA", (canvas_w, canvas_h), (0, 0, 0, 0))
@@ -299,6 +300,7 @@ def generate_device_template(config):
             # Mask to plateau shape
             plateau_base.putalpha(plat_mask)
             img = Image.alpha_composite(img, plateau_base)
+            d = ImageDraw.Draw(img)
 
             # Plateau outer rim highlight
             d.rounded_rectangle(
@@ -319,6 +321,7 @@ def generate_device_template(config):
             inner_edge_img = Image.new("RGBA", (canvas_w, canvas_h), (0, 0, 0, 0))
             inner_edge_img.putalpha(inner_edge)
             img = Image.alpha_composite(img, inner_edge_img)
+            d = ImageDraw.Draw(img)
 
         # Camera components
         for comp in cam_config["components"]:
@@ -339,6 +342,7 @@ def generate_device_template(config):
                     (0, 0), ring_shadow
                 )
                 img = Image.alpha_composite(img, ring_shadow_img)
+                d = ImageDraw.Draw(img)
 
                 # Metallic ring body
                 d.ellipse(
@@ -389,6 +393,7 @@ def generate_device_template(config):
                 lens_rgba = np.dstack([lens_px, lens_a])
                 lens_grad = Image.fromarray(lens_rgba, "RGBA")
                 img = Image.alpha_composite(img, lens_grad)
+                d = ImageDraw.Draw(img)
 
                 # Specular highlight on lens (top-left)
                 spec_x = comp["cx"] + int(comp["radius"] * 0.35)
