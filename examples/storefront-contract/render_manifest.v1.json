@@ -1,7 +1,7 @@
 {
   "contract": "spartina-device-render-catalog",
   "contract_version": 1,
-  "generated_at": "2026-10-02T05:21:59Z",
+  "generated_at": "2026-10-02T05:53:01Z",
   "renderer_version": "1.0.0",
   "variants": {
     "color-block__iphone-17__hard": {
@@ -14,7 +14,7 @@
       "views": {
         "rear": {
           "800": {
-            "content_hash": "sha256:965050ca37bd5f4be50eb3d5c7e480a4f244f74dd255b55b296bd354cf1ab215",
+            "content_hash": "sha256:44017f81383abee73779e7669c0485406e5034bdb03c3b5d529dad2525d2fe46",
             "format": "webp",
             "height": 1025,
             "path": "assets/color-block/iphone-17/hard/rear-800.webp",
@@ -64,7 +64,7 @@
       "views": {
         "rear": {
           "800": {
-            "content_hash": "sha256:cf4f6c3a018f801e0a61f20022474b398cd940e1aeaf3d329782e90a2476168c",
+            "content_hash": "sha256:a08b56c0a8a9e53d6dedb1ffa13d99588f9a6df30e8f1ee96028658dcd2139ec",
             "format": "webp",
             "height": 1042,
             "path": "assets/color-block/iphone-air/hard/rear-800.webp",
@@ -80,5 +80,5 @@
       }
     }
   },
-  "wallmock_commit": "c9ed7fee00573d49a1a8f6466d0a0919d7db46d2"
+  "wallmock_commit": "88ddbab9e6b79abebe19c01d41cac299ef5e0fc1"
 }
