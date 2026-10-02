@@ -7,7 +7,7 @@
   "status": "prototype",
   "provenance": {
     "verified_device_dimensions": "156.2 x 74.7 x 5.64 mm (Apple official spec — apple.com/iphone-air/specs/)",
-    "estimated_device_anchors": "single main lens + flash + mic on horizontally extended raised plateau (side-to-side plateau), corner radius, button positions (visually estimated from Apple product imagery)",
+    "estimated_device_anchors": "single main lens + flash + mic on full-width raised plateau (edge-to-edge across top rear), corner radius, button positions (visually estimated from Apple product imagery)",
     "assumed_case_parameters": "1.2mm case thickness, 1.2mm print bezel (slim prototype case assumptions for Air)",
     "supplier_geometry": "none — not a production SKU template"
   },
@@ -48,9 +48,9 @@
     }
   ],
   "camera_region": {
-    "x": 450,
-    "y": 187,
-    "w": 362,
-    "h": 208
+    "x": 325,
+    "y": 162,
+    "w": 1000,
+    "h": 278
   }
 }

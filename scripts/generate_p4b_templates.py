@@ -121,6 +121,18 @@ def generate_device_template(config):
         d = ImageDraw.Draw(mask)
         pad = cam_config["exclude_pad"]
 
+        # If a plateau exists, exclude the entire plateau region from print
+        # (the raised platform surface is not a good print target)
+        if "plateau" in cam_config:
+            plat = cam_config["plateau"]
+            plat_h = plat["bottom"] - plat["top"]
+            plat_r = plat_h // 2
+            d.rounded_rectangle(
+                [plat["left"], plat["top"], plat["right"], plat["bottom"]],
+                radius=plat_r,
+                fill=0
+            )
+
         for comp in cam_config["components"]:
             if comp["type"] == "lens":
                 r = comp["radius"] + comp.get("ring_width", 0) + pad
@@ -614,32 +626,36 @@ def _camera_config(camera_type, case_x, case_y, case_w, case_h):
         }
 
     elif camera_type == "air_plateau":
-        # iPhone Air: single lens + flash on a horizontally extended plateau
-        # The camera sits on a raised plateau that extends side-to-side
-        # across the upper-left portion of the phone
+        # iPhone Air: single lens + flash + mic on a full-width raised plateau
+        # The plateau extends essentially edge-to-edge across the top of the rear
+        # — matching Apple's iPhone Air design language.
         lens_radius = 65      # ~5.0mm main lens
         ring_width = 12
-        plateau_pad = 22      # padding around lens+flash for plateau
+        plateau_v_pad = 22    # vertical padding (top/bottom of plateau)
 
-        # Lens position: upper-left region
-        lens_cx = case_x + int(case_w * 0.23)
-        lens_cy = case_y + int(case_h * 0.12)
+        # Plateau spans nearly the full case width, edge-to-edge
+        # Small inset from case sides for visual naturalness
+        plateau_side_inset = 6
+        plateau_left = case_x + plateau_side_inset
+        plateau_right = case_x + case_w - plateau_side_inset
 
-        # Flash: to the right of lens, on the same plateau
-        flash_cx = lens_cx + 155
-        flash_cy = lens_cy + 2
+        # Plateau vertical position: across the top portion of the phone
+        plateau_top = case_y + int(case_h * 0.06)
+        plateau_bottom = case_y + int(case_h * 0.19)
+
+        # Lens position: left side within the plateau
+        lens_cx = case_x + int(case_w * 0.22)
+        lens_cy = (plateau_top + plateau_bottom) // 2
+
+        # Flash: right-center within the plateau
+        flash_cx = case_x + int(case_w * 0.62)
+        flash_cy = lens_cy - 4
         flash_size = 44
 
-        # Mic: to the right of flash
-        mic_cx = flash_cx + 65
-        mic_cy = lens_cy + 5
+        # Mic: far right within the plateau
+        mic_cx = case_x + int(case_w * 0.82)
+        mic_cy = lens_cy + 2
         mic_radius = 11
-
-        # Plateau boundaries (for overlay rendering)
-        plateau_left = lens_cx - lens_radius - ring_width - plateau_pad
-        plateau_right = mic_cx + mic_radius + plateau_pad
-        plateau_top = lens_cy - lens_radius - ring_width - plateau_pad
-        plateau_bottom = lens_cy + lens_radius + ring_width + plateau_pad
 
         return {
             "exclude_pad": 18,
@@ -810,7 +826,7 @@ IPHONE_AIR_CONFIG = {
     "canvas_h": 2150,
     "provenance": {
         "verified_device_dimensions": "156.2 x 74.7 x 5.64 mm (Apple official spec — apple.com/iphone-air/specs/)",
-        "estimated_device_anchors": "single main lens + flash + mic on horizontally extended raised plateau (side-to-side plateau), corner radius, button positions (visually estimated from Apple product imagery)",
+        "estimated_device_anchors": "single main lens + flash + mic on full-width raised plateau (edge-to-edge across top rear), corner radius, button positions (visually estimated from Apple product imagery)",
         "assumed_case_parameters": "1.2mm case thickness, 1.2mm print bezel (slim prototype case assumptions for Air)",
         "supplier_geometry": "none — not a production SKU template",
     },
