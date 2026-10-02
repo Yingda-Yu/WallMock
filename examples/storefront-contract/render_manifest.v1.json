@@ -1,9 +1,34 @@
 {
   "contract": "spartina-device-render-catalog",
   "contract_version": 1,
-  "generated_at": "2026-10-01T14:36:56Z",
+  "generated_at": "2026-10-02T02:50:17Z",
   "renderer_version": "1.0.0",
   "variants": {
+    "color-block__iphone-17__hard": {
+      "case_type": "hard",
+      "design_id": "color-block",
+      "device_id": "iphone-17",
+      "template_id": "iphone-17__hard__rear",
+      "template_status": "prototype",
+      "variant_id": "color-block__iphone-17__hard",
+      "views": {
+        "rear": {
+          "800": {
+            "content_hash": "sha256:69e33e163ecbcedf197a7e09f9488df4aef70adb45ef3f2daf0c4d3b6ba4ed58",
+            "format": "webp",
+            "height": 1025,
+            "path": "assets/color-block/iphone-17/hard/rear-800.webp",
+            "production_publishable": false,
+            "render_asset_id": "color-block__iphone-17__hard__rear__w800",
+            "renderer_version": "1.0.0",
+            "template_id": "iphone-17__hard__rear",
+            "template_status": "prototype",
+            "view": "rear",
+            "width": 800
+          }
+        }
+      }
+    },
     "color-block__iphone-17e__hard": {
       "case_type": "hard",
       "design_id": "color-block",
@@ -28,7 +53,32 @@
           }
         }
       }
+    },
+    "color-block__iphone-air__hard": {
+      "case_type": "hard",
+      "design_id": "color-block",
+      "device_id": "iphone-air",
+      "template_id": "iphone-air__hard__rear",
+      "template_status": "prototype",
+      "variant_id": "color-block__iphone-air__hard",
+      "views": {
+        "rear": {
+          "800": {
+            "content_hash": "sha256:7f0d209bf472da749a56b19b1a3b43933ed181c993723a4f323e88195ac77baf",
+            "format": "webp",
+            "height": 1042,
+            "path": "assets/color-block/iphone-air/hard/rear-800.webp",
+            "production_publishable": false,
+            "render_asset_id": "color-block__iphone-air__hard__rear__w800",
+            "renderer_version": "1.0.0",
+            "template_id": "iphone-air__hard__rear",
+            "template_status": "prototype",
+            "view": "rear",
+            "width": 800
+          }
+        }
+      }
     }
   },
-  "wallmock_commit": "a205d43e02c65200634d50ad6ea5a4a9a30ac82a"
+  "wallmock_commit": "8cbd75151120e70201acce5c3d945cfaaa153b2e"
 }

@@ -2,6 +2,22 @@
   "contract": "spartina-device-render-catalog",
   "contract_version": 1,
   "devices": {
+    "iphone-17": {
+      "device_id": "iphone-17",
+      "templates": [
+        {
+          "case_type": "hard",
+          "production_publishable": false,
+          "provenance": {
+            "supplier_geometry": "none — not a production SKU template"
+          },
+          "renderable": true,
+          "template_id": "iphone-17__hard__rear",
+          "template_status": "prototype",
+          "view": "rear"
+        }
+      ]
+    },
     "iphone-17e": {
       "device_id": "iphone-17e",
       "templates": [
@@ -17,7 +33,23 @@
           "view": "rear"
         }
       ]
+    },
+    "iphone-air": {
+      "device_id": "iphone-air",
+      "templates": [
+        {
+          "case_type": "hard",
+          "production_publishable": false,
+          "provenance": {
+            "supplier_geometry": "none — not a production SKU template"
+          },
+          "renderable": true,
+          "template_id": "iphone-air__hard__rear",
+          "template_status": "prototype",
+          "view": "rear"
+        }
+      ]
     }
   },
-  "wallmock_commit": "a205d43e02c65200634d50ad6ea5a4a9a30ac82a"
+  "wallmock_commit": "8cbd75151120e70201acce5c3d945cfaaa153b2e"
 }

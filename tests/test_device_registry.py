@@ -220,10 +220,13 @@ class TestRealDeviceRegistry:
         result = load_device_registry(path)
         assert result["contract"] == CONTRACT_NAME
         assert result["contract_version"] == CONTRACT_VERSION
-        assert len(result["devices"]) >= 1
-        # iPhone 17e should be present
+        # P4B Wave-1: exactly 3 devices
+        assert len(result["devices"]) == 3
         assert "iphone-17e" in result["device_map"]
-        d = result["device_map"]["iphone-17e"]
-        assert d.brand == "apple"
-        assert d.family == "iphone"
-        assert d.active_identity is True
+        assert "iphone-17" in result["device_map"]
+        assert "iphone-air" in result["device_map"]
+        for dev_id in ("iphone-17e", "iphone-17", "iphone-air"):
+            d = result["device_map"][dev_id]
+            assert d.brand == "apple"
+            assert d.family == "iphone"
+            assert d.active_identity is True

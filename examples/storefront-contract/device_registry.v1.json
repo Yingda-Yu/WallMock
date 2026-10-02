@@ -11,6 +11,30 @@
       "family": "iphone",
       "generation": "17",
       "sort_order": 17050
+    },
+    {
+      "active_identity": true,
+      "aliases": [
+        "iPhone 17 (2025)"
+      ],
+      "brand": "apple",
+      "device_id": "iphone-17",
+      "display_name": "iPhone 17",
+      "family": "iphone",
+      "generation": "17",
+      "sort_order": 17100
+    },
+    {
+      "active_identity": true,
+      "aliases": [
+        "iPhone Air (2025)"
+      ],
+      "brand": "apple",
+      "device_id": "iphone-air",
+      "display_name": "iPhone Air",
+      "family": "iphone",
+      "generation": "air",
+      "sort_order": 17200
     }
   ]
 }

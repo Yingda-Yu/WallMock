@@ -2,21 +2,21 @@
   "artifacts": {
     "device_registry.v1.json": {
       "filename": "device_registry.v1.json",
-      "sha256": "69b8c97fcc6ff515b3e81b5124fa37338d551308ef840b76195b8b11c5648165"
+      "sha256": "bc22f23beb1064c940c2fc72d443d692c0940ec7b677edc985bd7d62c6e25616"
     },
     "render_capabilities.v1.json": {
       "filename": "render_capabilities.v1.json",
-      "sha256": "b6ef7e9746b3cd5356eb7251dd7ffb5c229b7c00dbfe49f75966fd5b2ed25b99"
+      "sha256": "ad5b58137b85ceea048f69483e4618e6d222cb766c2a5bcf0e90814e8c019872"
     },
     "render_manifest.v1.json": {
       "filename": "render_manifest.v1.json",
-      "sha256": "ff65e8f15e8c0460174aeda9a4573f5839f032822f414a6d3006be9e371bf8f6"
+      "sha256": "d17bf5e2a8ee06f9172c392aa469bfaf7775310e6c9ed3cae48d9599cedc4bf3"
     }
   },
   "contract": "spartina-device-render-catalog",
   "contract_version": 1,
-  "generated_at": "2026-10-01T14:36:56Z",
+  "generated_at": "2026-10-02T02:50:17Z",
   "renderer_version": "1.0.0",
-  "wallmock_commit": "a205d43e02c65200634d50ad6ea5a4a9a30ac82a",
+  "wallmock_commit": "8cbd75151120e70201acce5c3d945cfaaa153b2e",
   "working_tree_dirty": true
 }
