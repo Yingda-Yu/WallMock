@@ -1,7 +1,7 @@
 {
   "contract": "spartina-device-render-catalog",
   "contract_version": 1,
-  "generated_at": "2026-10-02T04:33:53Z",
+  "generated_at": "2026-10-02T04:40:29Z",
   "renderer_version": "1.0.0",
   "variants": {
     "color-block__iphone-17__hard": {
@@ -80,5 +80,5 @@
       }
     }
   },
-  "wallmock_commit": "76aa8eb25253977be529492639bf88195b1999b2"
+  "wallmock_commit": "971e21e177a935ac45e90b224b2c9d73542c7b78"
 }

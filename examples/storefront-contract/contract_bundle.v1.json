@@ -6,17 +6,17 @@
     },
     "render_capabilities.v1.json": {
       "filename": "render_capabilities.v1.json",
-      "sha256": "f27efbd45ad98a36ee7a209ca5f1ea3462cf249fb877cccd0c47cc4c2684e6d0"
+      "sha256": "62d68a47e4e4c4fedb66e84af40359c0a1f9996e677d5cca4cde2b5516b62072"
     },
     "render_manifest.v1.json": {
       "filename": "render_manifest.v1.json",
-      "sha256": "f45c6a8fab3b2373857722094b208ae815ea3ff060f85102b7bb73a6fc4cf91e"
+      "sha256": "123a5b0267a70eaba134e70f7da3d0fdbeacf178cdbd0fc7d665d520bf030bc8"
     }
   },
   "contract": "spartina-device-render-catalog",
   "contract_version": 1,
-  "generated_at": "2026-10-02T04:33:53Z",
+  "generated_at": "2026-10-02T04:40:29Z",
   "renderer_version": "1.0.0",
-  "wallmock_commit": "76aa8eb25253977be529492639bf88195b1999b2",
+  "wallmock_commit": "971e21e177a935ac45e90b224b2c9d73542c7b78",
   "working_tree_dirty": true
 }
