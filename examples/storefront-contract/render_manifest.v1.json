@@ -1,7 +1,7 @@
 {
   "contract": "spartina-device-render-catalog",
   "contract_version": 1,
-  "generated_at": "2026-10-02T04:40:29Z",
+  "generated_at": "2026-10-02T05:21:59Z",
   "renderer_version": "1.0.0",
   "variants": {
     "color-block__iphone-17__hard": {
@@ -64,7 +64,7 @@
       "views": {
         "rear": {
           "800": {
-            "content_hash": "sha256:d752b5ab2e665fc4378cc3a7152d98bbe21c36af63f3b7ec14111a9d82c9efc4",
+            "content_hash": "sha256:cf4f6c3a018f801e0a61f20022474b398cd940e1aeaf3d329782e90a2476168c",
             "format": "webp",
             "height": 1042,
             "path": "assets/color-block/iphone-air/hard/rear-800.webp",
@@ -80,5 +80,5 @@
       }
     }
   },
-  "wallmock_commit": "971e21e177a935ac45e90b224b2c9d73542c7b78"
+  "wallmock_commit": "c9ed7fee00573d49a1a8f6466d0a0919d7db46d2"
 }
