@@ -1,0 +1,3 @@
+TEST FIXTURE - Synthetic supplier geometry for testing only.
+This is NOT a real supplier dieline. Do not use for production.
+Generated for WallMock P7A test suite.

@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "package_id": "test-fixture-hardcase-iphone-17e",
+  "supplier_id": "test-supplier-co",
+  "supplier_reference": "TEST-SKU-17E-HARD-001",
+  "device_id": "iphone-17e",
+  "case_type": "hard",
+  "revision": "v1",
+  "source_type": "normalized_export",
+  "source_files": [
+    {
+      "name": "iphone-17e-hard-dieline.svg",
+      "sha256": "497f2eecaf9ccb217ae1783dc17be65ff57210f5a49924323b85043d718957ab"
+    },
+    {
+      "name": "source-notes.txt",
+      "sha256": "0b1294ef79757b9e3c103318ee98113fb22715aca1b5c1be24a42388d00002ab"
+    }
+  ],
+  "dimensions": {
+    "width": 71.5,
+    "height": 146.7,
+    "units": "mm"
+  },
+  "geometry_notes": "TEST FIXTURE — synthetic geometry generated for automated testing. Not derived from real supplier data. Do not use for production.",
+  "obtained_from": "WallMock test suite (synthetic fixture)",
+  "verified_by": "test-owner@wallmock.test",
+  "reviewed": true,
+  "target_template_id": "iphone-17e__hard__rear",
+  "normalized_geometry": {
+    "canvas": {
+      "width": 1600,
+      "height": 2000,
+      "units": "px"
+    },
+    "print_region": {
+      "x": 335,
+      "y": 45,
+      "width": 930,
+      "height": 1910
+    },
+    "camera_region": {
+      "x": 200,
+      "y": 200,
+      "width": 200,
+      "height": 200
+    }
+  },
+  "normalized_layers": [
+    {
+      "name": "Base",
+      "file": "base.png",
+      "sha256": "4061219975b52919c3bd6c0aa4de2f5ce8e6de4a1f2306c3cc376e9997d6c6a0",
+      "role": "base"
+    },
+    {
+      "name": "Print Mask",
+      "file": "print_mask.png",
+      "sha256": "cfed727ca6bf56acad03e89ef23c79bd6c7e6022987ff8d4877ff27414493c79",
+      "role": "print_mask"
+    },
+    {
+      "name": "Overlay",
+      "file": "overlay.png",
+      "sha256": "f98a803c46ec1186f8254d543692b662e4769ec590e0703b3785a59578d23d75",
+      "role": "overlay"
+    },
+    {
+      "name": "Highlight",
+      "file": "highlight.png",
+      "sha256": "99a2eec0801ea374e216abb8bc28f6ec059af43d182b5c0eacbac6c918ee8e93",
+      "role": "highlight"
+    },
+    {
+      "name": "Shadow",
+      "file": "shadow.png",
+      "sha256": "935abf93565801612a4fbe4dd15790fb5d4e143eb753a836adaa8ca9b035fd92",
+      "role": "shadow"
+    }
+  ]
+}
