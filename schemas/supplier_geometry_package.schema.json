@@ -1,0 +1,212 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "supplier_geometry_package.schema.json",
+  "title": "Supplier Geometry Package",
+  "description": "Defines a validated supplier geometry package used to promote case templates from prototype to production status.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "package_id",
+    "supplier_id",
+    "supplier_reference",
+    "device_id",
+    "case_type",
+    "revision",
+    "source_type",
+    "source_files",
+    "dimensions",
+    "geometry_notes",
+    "obtained_from",
+    "verified_by",
+    "reviewed",
+    "target_template_id",
+    "normalized_geometry",
+    "normalized_layers"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Schema version. Must be 1 for v1 of the supplier geometry package format."
+    },
+    "package_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]*$",
+      "description": "Unique identifier for this geometry package. Lowercase alphanumeric with hyphens and underscores. Test fixtures must start with 'test-' or 'fixture-'."
+    },
+    "supplier_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identifier for the supplier who provided this geometry."
+    },
+    "supplier_reference": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Supplier's own reference (SKU, part number, or file reference) for this geometry."
+    },
+    "device_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]*$",
+      "description": "Device ID from the device registry, e.g. 'iphone-17e'."
+    },
+    "case_type": {
+      "type": "string",
+      "enum": ["hard", "tough", "magsafe", "clear", "soft"],
+      "description": "Case type (Contract v1 token). Must match a valid Contract v1 case type: hard, tough, magsafe, clear, soft."
+    },
+    "revision": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Revision identifier for this geometry version (e.g. 'v1', 'revA', '2025-03-15')."
+    },
+    "source_type": {
+      "type": "string",
+      "enum": ["dieline", "psd_export", "cad_export", "measured", "normalized_export"],
+      "description": "Type of source geometry provided by the supplier."
+    },
+    "source_files": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "sha256"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Filename of the source file inside the source/ directory."
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "description": "SHA-256 hex digest of the source file."
+          }
+        }
+      },
+      "description": "List of source files provided by the supplier, each with its SHA-256 hash."
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height", "units"],
+      "properties": {
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Width of the case geometry."
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Height of the case geometry."
+        },
+        "units": {
+          "type": "string",
+          "enum": ["mm", "cm", "in", "px"],
+          "description": "Units for the dimensions."
+        }
+      },
+      "description": "Physical or pixel dimensions of the case geometry."
+    },
+    "geometry_notes": {
+      "type": "string",
+      "description": "Free-form notes about the geometry (edge cases, special handling, known discrepancies, etc.)."
+    },
+    "obtained_from": {
+      "type": "string",
+      "minLength": 1,
+      "description": "How/where this geometry was obtained (supplier contact, portal download, email, etc.)."
+    },
+    "verified_by": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Owner who reviewed and verified this geometry package. Must be non-empty and not a sentinel value."
+    },
+    "reviewed": {
+      "type": "boolean",
+      "description": "Whether this package has been owner-reviewed. MUST be true for production promotion."
+    },
+    "target_template_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]*$",
+      "description": "The template ID this package targets, in device_id__case_type__view format."
+    },
+    "normalized_geometry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canvas", "print_region"],
+      "description": "Normalized geometry metadata for the exported layers.",
+      "properties": {
+        "canvas": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["width", "height", "units"],
+          "description": "Pixel dimensions of normalized layers.",
+          "properties": {
+            "width": {"type": "integer", "minimum": 100, "maximum": 8000},
+            "height": {"type": "integer", "minimum": 100, "maximum": 8000},
+            "units": {"type": "string", "enum": ["px"]}
+          }
+        },
+        "print_region": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["x", "y", "width", "height"],
+          "description": "Printable area within the canvas (in canvas pixels).",
+          "properties": {
+            "x": {"type": "integer", "minimum": 0},
+            "y": {"type": "integer", "minimum": 0},
+            "width": {"type": "integer", "minimum": 1},
+            "height": {"type": "integer", "minimum": 1}
+          }
+        },
+        "camera_region": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["x", "y", "width", "height"],
+          "description": "Optional camera/module exclusion area within the canvas (in canvas pixels).",
+          "properties": {
+            "x": {"type": "integer", "minimum": 0},
+            "y": {"type": "integer", "minimum": 0},
+            "width": {"type": "integer", "minimum": 1},
+            "height": {"type": "integer", "minimum": 1}
+          }
+        }
+      }
+    },
+    "normalized_layers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "file", "sha256", "role"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Human-readable name of this layer."
+          },
+          "file": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Filename of the layer PNG inside the normalized/ directory."
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "description": "SHA-256 hex digest of the layer file."
+          },
+          "role": {
+            "type": "string",
+            "enum": ["base", "print_mask", "overlay", "highlight", "shadow"],
+            "description": "Layer role in the template compositing stack."
+          }
+        }
+      },
+      "description": "List of normalized PNG layers ready for use in a case template."
+    }
+  }
+}
