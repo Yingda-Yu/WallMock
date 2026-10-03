@@ -1,0 +1,84 @@
+{
+  "contract": "spartina-device-render-catalog",
+  "contract_version": 1,
+  "generated_at": "2026-10-02T05:53:01Z",
+  "renderer_version": "1.0.0",
+  "variants": {
+    "color-block__iphone-17__hard": {
+      "case_type": "hard",
+      "design_id": "color-block",
+      "device_id": "iphone-17",
+      "template_id": "iphone-17__hard__rear",
+      "template_status": "prototype",
+      "variant_id": "color-block__iphone-17__hard",
+      "views": {
+        "rear": {
+          "800": {
+            "content_hash": "sha256:44017f81383abee73779e7669c0485406e5034bdb03c3b5d529dad2525d2fe46",
+            "format": "webp",
+            "height": 1025,
+            "path": "assets/color-block/iphone-17/hard/rear-800.webp",
+            "production_publishable": false,
+            "render_asset_id": "color-block__iphone-17__hard__rear__w800",
+            "renderer_version": "1.0.0",
+            "template_id": "iphone-17__hard__rear",
+            "template_status": "prototype",
+            "view": "rear",
+            "width": 800
+          }
+        }
+      }
+    },
+    "color-block__iphone-17e__hard": {
+      "case_type": "hard",
+      "design_id": "color-block",
+      "device_id": "iphone-17e",
+      "template_id": "iphone-17e__hard__rear",
+      "template_status": "prototype",
+      "variant_id": "color-block__iphone-17e__hard",
+      "views": {
+        "rear": {
+          "800": {
+            "content_hash": "sha256:738dfde9e68672a685e833cc4857e31e0783d6162d62ccc8af44b0c765c2a420",
+            "format": "webp",
+            "height": 1000,
+            "path": "assets/color-block/iphone-17e/hard/rear-800.webp",
+            "production_publishable": false,
+            "render_asset_id": "color-block__iphone-17e__hard__rear__w800",
+            "renderer_version": "1.0.0",
+            "template_id": "iphone-17e__hard__rear",
+            "template_status": "prototype",
+            "view": "rear",
+            "width": 800
+          }
+        }
+      }
+    },
+    "color-block__iphone-air__hard": {
+      "case_type": "hard",
+      "design_id": "color-block",
+      "device_id": "iphone-air",
+      "template_id": "iphone-air__hard__rear",
+      "template_status": "prototype",
+      "variant_id": "color-block__iphone-air__hard",
+      "views": {
+        "rear": {
+          "800": {
+            "content_hash": "sha256:a08b56c0a8a9e53d6dedb1ffa13d99588f9a6df30e8f1ee96028658dcd2139ec",
+            "format": "webp",
+            "height": 1042,
+            "path": "assets/color-block/iphone-air/hard/rear-800.webp",
+            "production_publishable": false,
+            "render_asset_id": "color-block__iphone-air__hard__rear__w800",
+            "renderer_version": "1.0.0",
+            "template_id": "iphone-air__hard__rear",
+            "template_status": "prototype",
+            "view": "rear",
+            "width": 800
+          }
+        }
+      }
+    }
+  },
+  "wallmock_commit": "88ddbab9e6b79abebe19c01d41cac299ef5e0fc1"
+}

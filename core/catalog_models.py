@@ -19,16 +19,22 @@ from typing import List, Optional, Tuple
 
 @dataclass(frozen=True)
 class Device:
-    """An exact sellable phone model.
+    """An exact sellable phone model in the canonical device registry.
 
-    The registry is data-driven. Do not bake model names into Python conditionals.
+    A device identity may exist in the registry even when WallMock has
+    no template for it yet. Device identity ≠ render capability.
+
+    The registry is data-driven. Do not bake model names into Python
+    conditionals.
     """
-    id: str
+    device_id: str
     brand: str
     family: str
     display_name: str
+    generation: str = ""
     aliases: List[str] = field(default_factory=list)
-    active: bool = True
+    sort_order: int = 0
+    active_identity: bool = True
 
 
 # ---------------------------------------------------------------------------
@@ -174,6 +180,7 @@ class CaseTemplate:
     layers: List[CaseTemplateLayer]
     status: str = TEMPLATE_STATUS_PROTOTYPE
     provenance: Optional[TemplateProvenance] = None
+    camera_region: Optional[dict] = None
 
 
 # ---------------------------------------------------------------------------

@@ -1,0 +1,88 @@
+{
+  "mode": "preview",
+  "renderer_version": "1.0.0",
+  "schema_version": 1,
+  "variants": {
+    "color-block__iphone-17__hard": {
+      "assets": {
+        "rear-w1200": {
+          "fingerprint": "sha256:f52b954aa61baca0db4fe0664f892ec520cce888f0dc4f2d4031b3d077281929",
+          "height": 1538,
+          "path": "assets/color-block/iphone-17/hard/rear-w1200.f52b954aa61b.webp",
+          "status": "generated"
+        },
+        "rear-w1600": {
+          "fingerprint": "sha256:bca20a1dff7aa5b0c7159820e1a01adc6c0fd1ec2378cafb6275485b690263c2",
+          "height": 2050,
+          "path": "assets/color-block/iphone-17/hard/rear-w1600.bca20a1dff7a.webp",
+          "status": "generated"
+        },
+        "rear-w800": {
+          "fingerprint": "sha256:a6fc3a53ec64c4da0dc6ece0206d304005b5b3d6e2b60f5af06f63d20a1765cf",
+          "height": 1025,
+          "path": "assets/color-block/iphone-17/hard/rear-w800.a6fc3a53ec64.webp",
+          "status": "generated"
+        }
+      },
+      "case_id": "hard",
+      "design_id": "color-block",
+      "device_id": "iphone-17",
+      "template_id": "iphone-17__hard__rear",
+      "template_status": "prototype"
+    },
+    "color-block__iphone-17e__hard": {
+      "assets": {
+        "rear-w1200": {
+          "fingerprint": "sha256:9a2c0804c2a70dc06e498d313b62bf5523f2ec8676df066420b85e3138c06329",
+          "height": 1500,
+          "path": "assets/color-block/iphone-17e/hard/rear-w1200.9a2c0804c2a7.webp",
+          "status": "generated"
+        },
+        "rear-w1600": {
+          "fingerprint": "sha256:ad75501b0bca40ec5f5ba723e97b229b19721263c641f90ea4a911a7a0051450",
+          "height": 2000,
+          "path": "assets/color-block/iphone-17e/hard/rear-w1600.ad75501b0bca.webp",
+          "status": "generated"
+        },
+        "rear-w800": {
+          "fingerprint": "sha256:1f7ac04aaa1bb37cd6d424587469f0ccb614b71a9ca82868b9294c212b69c634",
+          "height": 1000,
+          "path": "assets/color-block/iphone-17e/hard/rear-w800.1f7ac04aaa1b.webp",
+          "status": "generated"
+        }
+      },
+      "case_id": "hard",
+      "design_id": "color-block",
+      "device_id": "iphone-17e",
+      "template_id": "iphone-17e__hard__rear",
+      "template_status": "prototype"
+    },
+    "color-block__iphone-air__hard": {
+      "assets": {
+        "rear-w1200": {
+          "fingerprint": "sha256:d15b873d94bbaa6416964e9b76bd4d20d9ec68d39c489153ab13270a7ff0fc3e",
+          "height": 1564,
+          "path": "assets/color-block/iphone-air/hard/rear-w1200.d15b873d94bb.webp",
+          "status": "generated"
+        },
+        "rear-w1600": {
+          "fingerprint": "sha256:57f1b3cd3bfbdb36098790949410a5e59d737fc2ee56bff219c4f40970a4c56a",
+          "height": 2085,
+          "path": "assets/color-block/iphone-air/hard/rear-w1600.57f1b3cd3bfb.webp",
+          "status": "generated"
+        },
+        "rear-w800": {
+          "fingerprint": "sha256:09690b92aa9a9b30b05fd8e9b44406fb75137c4119207c2f8a48ff3760cb5b43",
+          "height": 1042,
+          "path": "assets/color-block/iphone-air/hard/rear-w800.09690b92aa9a.webp",
+          "status": "generated"
+        }
+      },
+      "case_id": "hard",
+      "design_id": "color-block",
+      "device_id": "iphone-air",
+      "template_id": "iphone-air__hard__rear",
+      "template_status": "prototype"
+    }
+  }
+}

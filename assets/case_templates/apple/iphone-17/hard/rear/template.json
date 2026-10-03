@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "id": "iphone-17__hard__rear",
+  "device_id": "iphone-17",
+  "case_type": "hard",
+  "view": "rear",
+  "status": "prototype",
+  "provenance": {
+    "verified_device_dimensions": "149.6 x 71.5 x 7.95 mm (Apple official spec — apple.com/iphone-17/specs/)",
+    "estimated_device_anchors": "48MP Dual Fusion — vertically stacked dual camera (main top, ultrawide bottom), flash + mic to right, corner radius, button positions (visually estimated from Apple product imagery)",
+    "assumed_case_parameters": "1.5mm case thickness, 1.5mm print bezel (prototype hard-case assumptions)",
+    "supplier_geometry": "none — not a production SKU template"
+  },
+  "canvas": {
+    "width": 1600,
+    "height": 2050
+  },
+  "print_region": {
+    "mode": "mask",
+    "x": 336,
+    "y": 53,
+    "width": 928,
+    "height": 1944,
+    "fit": "cover",
+    "mask": "print_mask.png"
+  },
+  "layers": [
+    {
+      "type": "shadow",
+      "file": "shadow.png"
+    },
+    {
+      "type": "base",
+      "file": "base.png"
+    },
+    {
+      "type": "artwork",
+      "blend": "normal"
+    },
+    {
+      "type": "highlight",
+      "file": "highlight.png",
+      "opacity": 1.0
+    },
+    {
+      "type": "overlay",
+      "file": "overlay.png"
+    }
+  ],
+  "camera_region": {
+    "x": 436,
+    "y": 159,
+    "w": 263,
+    "h": 304
+  }
+}

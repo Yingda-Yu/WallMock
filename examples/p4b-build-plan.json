@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "mode": "preview",
+  "design_ids": ["color-block"],
+  "targets": [
+    {
+      "device_id": "iphone-17e",
+      "case_type": "hard",
+      "views": ["rear"],
+      "widths": [800, 1200, 1600]
+    },
+    {
+      "device_id": "iphone-17",
+      "case_type": "hard",
+      "views": ["rear"],
+      "widths": [800, 1200, 1600]
+    },
+    {
+      "device_id": "iphone-air",
+      "case_type": "hard",
+      "views": ["rear"],
+      "widths": [800, 1200, 1600]
+    }
+  ],
+  "render_options": {
+    "fit_mode": "cover",
+    "webp_quality": 85
+  }
+}

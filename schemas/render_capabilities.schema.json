@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "render_capabilities.schema.json",
+  "title": "Render Capabilities",
+  "description": "Describes what WallMock CAN render (device x case_type x view templates). Capability does not imply a rendered asset exists.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract", "contract_version", "wallmock_commit", "devices"],
+  "properties": {
+    "contract": {
+      "type": "string",
+      "const": "spartina-device-render-catalog"
+    },
+    "contract_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "wallmock_commit": {
+      "type": "string",
+      "description": "Git SHA of the WallMock build that generated this export."
+    },
+    "devices": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["device_id", "templates"],
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "templates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["template_id", "case_type", "view", "template_status", "renderable", "production_publishable", "provenance"],
+              "properties": {
+                "template_id": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9][a-z0-9-]*__[a-z]+__[a-z]+$"
+                },
+                "case_type": {
+                  "type": "string",
+                  "enum": ["hard", "tough", "magsafe", "clear", "soft"]
+                },
+                "view": {
+                  "type": "string",
+                  "enum": ["rear", "angle", "front", "closeup"]
+                },
+                "template_status": {
+                  "type": "string",
+                  "enum": ["prototype", "production"]
+                },
+                "renderable": {
+                  "type": "boolean",
+                  "description": "Whether WallMock can technically generate a render for this template."
+                },
+                "production_publishable": {
+                  "type": "boolean",
+                  "description": "Whether this template has supplier-accurate geometry and is safe for production publishing. Must be false when template_status is 'prototype'."
+                },
+                "provenance": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["supplier_geometry"],
+                  "properties": {
+                    "supplier_geometry": {
+                      "type": "string",
+                      "description": "Supplier geometry source. Sentinels like 'none', 'n/a', 'unknown' indicate prototype-only geometry."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Catalog Build Plan",
+  "description": "Defines what designs, devices, case types, views, and widths to render for a catalog build.",
+  "type": "object",
+  "required": ["schema_version", "mode", "design_ids", "targets", "render_options"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "description": "Schema version for the build plan format.",
+      "const": 1
+    },
+    "mode": {
+      "type": "string",
+      "description": "Build mode: preview allows prototype templates, publish requires production.",
+      "enum": ["preview", "publish"]
+    },
+    "design_ids": {
+      "type": "array",
+      "description": "List of design IDs to include in the build.",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9-]*$"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "targets": {
+      "type": "array",
+      "description": "List of render targets (device + case_type + views + widths).",
+      "items": {
+        "type": "object",
+        "required": ["device_id", "case_type", "views", "widths"],
+        "additionalProperties": false,
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "case_type": {
+            "type": "string",
+            "enum": ["hard", "tough", "magsafe", "clear", "soft"]
+          },
+          "views": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["rear", "angle", "front", "closeup"]
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "widths": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 8000
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        }
+      },
+      "minItems": 1
+    },
+    "render_options": {
+      "type": "object",
+      "description": "Rendering options applied to all targets.",
+      "required": ["fit_mode"],
+      "additionalProperties": false,
+      "properties": {
+        "fit_mode": {
+          "type": "string",
+          "enum": ["cover", "contain", "tile"]
+        },
+        "zoom": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 10.0,
+          "default": 1.0
+        },
+        "offset_x": {
+          "type": "number",
+          "minimum": -1.0,
+          "maximum": 1.0,
+          "default": 0.0
+        },
+        "offset_y": {
+          "type": "number",
+          "minimum": -1.0,
+          "maximum": 1.0,
+          "default": 0.0
+        },
+        "webp_quality": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 85
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "artifacts": {
+    "device_registry.v1.json": {
+      "filename": "device_registry.v1.json",
+      "sha256": "bc22f23beb1064c940c2fc72d443d692c0940ec7b677edc985bd7d62c6e25616"
+    },
+    "render_capabilities.v1.json": {
+      "filename": "render_capabilities.v1.json",
+      "sha256": "8f6c29576c56547cb342152bee46c233c694adf6681a08a06d40342dff5bb10a"
+    },
+    "render_manifest.v1.json": {
+      "filename": "render_manifest.v1.json",
+      "sha256": "32cdb0a77e8bf039408fc24e447e308588872b8848d176eb66e851f667f8d8f3"
+    }
+  },
+  "contract": "spartina-device-render-catalog",
+  "contract_version": 1,
+  "generated_at": "2026-10-02T05:53:01Z",
+  "renderer_version": "1.0.0",
+  "wallmock_commit": "88ddbab9e6b79abebe19c01d41cac299ef5e0fc1",
+  "working_tree_dirty": false
+}
