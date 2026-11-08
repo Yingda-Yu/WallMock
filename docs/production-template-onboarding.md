@@ -157,7 +157,7 @@ Prototype templates are skipped (gated).
 Validate the output contract bundle:
 
 ```bash
-python scripts/validate_storefront_contract.py <bundle_dir>
+python scripts/validate_storefront_contract.py --bundle <bundle_dir>
 ```
 
 Checks cross-object invariants across device registry, render
