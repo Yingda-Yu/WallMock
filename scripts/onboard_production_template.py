@@ -63,16 +63,6 @@ from core.supplier_geometry import (
 # Path to canonical templates root (for fixture-into-canonical protection).
 _CANONICAL_TEMPLATES_ROOT = _project_root / "assets" / "case_templates"
 
-# Source types that carry device dimension verification evidence.
-# dieline and cad_export come from engineering-grade files that encode
-# actual device dimensions. measured/normalized_export/psd_export provide
-# case geometry but do NOT independently verify device dimensions.
-_DEVICE_DIMENSION_VERIFYING_SOURCES = frozenset({"dieline", "cad_export"})
-
-# Source types that provide accurate device anchor positions.
-_DEVICE_ANCHOR_VERIFYING_SOURCES = frozenset({"dieline", "cad_export"})
-
-
 # ---------------------------------------------------------------------------
 # Core promotion logic (importable for testing)
 # ---------------------------------------------------------------------------
@@ -415,6 +405,7 @@ def _do_promote_atomic(
         # --- Step 4: Validate staged template ---
         try:
             load_case_template(str(staging_tpl_json))
+            _validate_staged_rasters(staging_tpl_dir)
         except CatalogValidationError as e:
             raise ValueError(
                 f"Staged template failed validation: {e}"
@@ -447,6 +438,24 @@ def _do_promote_atomic(
         # Clean up backup dir (on success, or after restore on failure)
         if backup_dir is not None and backup_dir.exists():
             shutil.rmtree(str(backup_dir), ignore_errors=True)
+
+
+def _validate_staged_rasters(tpl_dir: Path):
+    """Decode every referenced raster and require the supplier canvas size."""
+    from PIL import Image
+
+    data = json.loads((tpl_dir / "template.json").read_text(encoding="utf-8"))
+    expected = (data["canvas"]["width"], data["canvas"]["height"])
+    filenames = {layer["file"] for layer in data["layers"] if layer.get("file")}
+    filenames.add(data["print_region"]["mask"])
+    for filename in filenames:
+        raster = (tpl_dir / filename).resolve()
+        if not raster.is_relative_to(tpl_dir.resolve()):
+            raise ValueError(f"Staged raster escapes template directory: {filename}")
+        with Image.open(raster) as img:
+            img.load()
+            if img.size != expected:
+                raise ValueError(f"Staged raster {filename} has size {img.size}, expected {expected}")
 
 
 def _apply_promotion_changes(
@@ -494,6 +503,31 @@ def _apply_promotion_changes(
     with open(tpl_json_path, "r", encoding="utf-8") as f:
         tpl_data = _json.load(f)
 
+    # Only supplier-provided raster roles may survive promotion. Rebuild
+    # references (including newly supplied optional roles) and remove old files.
+    old_layers = tpl_data.get("layers", [])
+    old_by_role = {layer["type"]: layer for layer in old_layers}
+    new_layers = []
+    for role in ("shadow", "base", "artwork", "highlight", "overlay"):
+        if role != "artwork" and role not in layer_files:
+            continue
+        layer = dict(old_by_role.get(role, {"type": role}))
+        if role == "artwork":
+            layer.pop("file", None)
+        else:
+            layer["file"] = f"{role}.png"
+        new_layers.append(layer)
+    retained = {(tpl_dir / f"{role}.png").resolve() for role in layer_files}
+    old_files = {layer["file"] for layer in old_layers if layer.get("file")}
+    old_files.add(tpl_data.get("print_region", {}).get("mask", "print_mask.png"))
+    for filename in old_files:
+        if not filename:
+            continue
+        stale = (tpl_dir / filename).resolve()
+        if stale not in retained and stale.is_relative_to(tpl_dir.resolve()) and stale.is_file():
+            stale.unlink()
+    tpl_data["layers"] = new_layers
+
     # Update status to production
     tpl_data["status"] = TEMPLATE_STATUS_PRODUCTION
 
@@ -515,7 +549,7 @@ def _apply_promotion_changes(
         "width": norm_geom.print_region_width,
         "height": norm_geom.print_region_height,
         "fit": existing_pr.get("fit", "cover"),
-        "mask": existing_pr.get("mask", "print_mask.png"),
+        "mask": "print_mask.png",
     }
 
     # Update camera_region from supplier geometry (if present)
@@ -542,38 +576,11 @@ def _apply_promotion_changes(
         "estimated_device_anchors", ""
     )
 
-    # Determine what the supplier package actually verifies:
-    # - dieline/cad_export: can verify device dimensions and anchors
-    # - measured/normalized_export/psd_export: case geometry only,
-    #   device dimensions remain from prototype source
+    # Source format is not evidence of device dimensions or anchor accuracy.
+    # Package v1 supplies case geometry only; preserve the existing claims.
     source_type = pkg.source_type
-    verifies_device_dims = source_type in _DEVICE_DIMENSION_VERIFYING_SOURCES
-    verifies_device_anchors = source_type in _DEVICE_ANCHOR_VERIFYING_SOURCES
-
-    # verified_device_dimensions:
-    # - Only claim supplier-verified if source actually verifies device dims
-    # - Otherwise preserve the existing verified_device_dimensions text
-    if verifies_device_dims:
-        verified_device_dimensions = (
-            f"Supplier-verified via {pkg.supplier_id} ({pkg.supplier_reference})"
-        )
-    else:
-        # Preserve existing official device-dimension provenance
-        # (e.g. from manufacturer spec pages). The supplier package
-        # provides case geometry but does not independently verify
-        # device dimensions.
-        verified_device_dimensions = existing_verified
-
-    # estimated_device_anchors:
-    # - If supplier provides accurate anchors (dieline/cad), update
-    # - Otherwise keep existing estimation
-    if verifies_device_anchors:
-        estimated_device_anchors = (
-            f"Supplier-accurate from {source_type} ({pkg.supplier_id})"
-        )
-    else:
-        # Keep existing estimated anchors from prototype
-        estimated_device_anchors = existing_anchors
+    verified_device_dimensions = existing_verified
+    estimated_device_anchors = existing_anchors
 
     # assumed_case_parameters:
     # - Always update to reflect supplier-provided case geometry

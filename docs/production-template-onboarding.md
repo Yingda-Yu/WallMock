@@ -58,7 +58,9 @@ normalized layer set:
 | `highlight.png` | highlight | Gloss / lighting effects (optional) |
 | `shadow.png` | shadow | Drop shadow (optional) |
 
-All layers must be PNG, same dimensions, and aligned pixel-perfect.
+All layers must be PNG, match `normalized_geometry.canvas`, and be aligned
+pixel-perfect. Hard cases require base, print_mask, and overlay. Only supplier
+layers are used after promotion; omitted optional layers are not inherited.
 
 ### 4. Validate
 
@@ -75,7 +77,9 @@ What it checks:
 - `target_template_id` follows `device_id__case_type__view` grammar
 - All source files exist and SHA-256 hashes match
 - All normalized layers exist and SHA-256 hashes match
-- All normalized layers have identical dimensions
+- All normalized layers match `normalized_geometry.canvas`
+- Print/camera regions are bounded inside the canvas
+- Hard cases require base, print_mask, and overlay; highlight/shadow are optional
 - Print mask has non-transparent pixels (not empty)
 - No path traversal in any file references
 - Package is owner-reviewed (`reviewed: true` + `verified_by` set)
@@ -113,27 +117,36 @@ What it does:
 2. Rejects test/fixture packages by default (safety guard)
 3. Finds the target template in `assets/case_templates/`
 4. Verifies template ID matches the package target
-5. Copies normalized layers into the template directory
-6. Updates `template.json`:
-   - `status: "production"`
-   - `provenance.supplier_geometry: "<package_id>@<revision>"`
-   - Preserves existing provenance fields, marks supplier-backed ones
-7. Validates the promoted template with `load_case_template()`
+5. Creates a sibling staging copy; canonical assets are not modified yet
+6. Applies supplier `normalized_geometry` (canvas, print region, optional camera region)
+   and supplier layers to staging. Omitted optional prototype layers and their
+   references are removed; the print mask always references the supplier mask.
+7. Sets `status: "production"` and the exact
+   `provenance.supplier_geometry: "<package_id>@<revision>"` reference.
+   Device-dimension provenance and estimated anchor wording remain unchanged:
+   a dieline/CAD source format alone does not verify those claims.
+8. Validates staged metadata and decodes every referenced raster, requiring
+   its dimensions to match the supplier canvas.
+9. Moves the original into a backup, then installs the validated staging copy.
+   A failed final move restores the original; failed staged validation never
+   alters the canonical directory.
 
 **Idempotent:** Promoting an already-production template with the same
 package is a safe no-op.
 
 **Dry run:** Use `--dry-run` to preview changes.
 
-**Allow fixtures:** Use `--allow-fixture` for testing with test packages
-(never use this for real production templates).
+**Fixture isolation:** The CLI has no fixture override. The programmatic
+`allow_fixture=True` option exists only for tests in explicitly noncanonical
+roots. Even with this option, canonical `assets/case_templates/` and its
+subdirectories reject fixtures.
 
 ### 7. Publish Build
 
 Run a publish-mode catalog build to generate production assets:
 
 ```bash
-python scripts/build_catalog.py build-plan.json --mode publish
+python scripts/build_catalog.py --plan build-plan.json --out build-output --mode publish
 ```
 
 Publish mode only renders templates with `status: "production"`.
@@ -181,7 +194,7 @@ supplier-geometry-package/
 | `supplier_id` | str | Supplier identifier |
 | `supplier_reference` | str | Supplier's SKU or file reference |
 | `device_id` | str | Device registry ID |
-| `case_type` | str | `hard` / `tough` / `magsafe` / `transparent` / `soft` |
+| `case_type` | str | `hard` / `tough` / `magsafe` / `clear` / `soft` |
 | `revision` | str | Revision string |
 | `source_type` | enum | `dieline` / `psd_export` / `cad_export` / `measured` / `normalized_export` |
 | `source_files` | array | `[{name, sha256}]` — source file inventory |
@@ -191,6 +204,7 @@ supplier-geometry-package/
 | `verified_by` | str | Reviewer name/email (non-sentinel) |
 | `reviewed` | bool | Must be `true` for production |
 | `target_template_id` | str | Target template: `device_id__case_type__view` |
+| `normalized_geometry` | object | Pixel `canvas: {width, height, units: "px"}`, bounded `print_region: {x, y, width, height}`, optional `camera_region` with the same region fields |
 | `normalized_layers` | array | `[{name, file, sha256, role}]` — layer inventory |
 
 ---
@@ -230,7 +244,7 @@ When requesting geometry from a new supplier, send this checklist:
 
 Test packages have IDs starting with `test-` or `fixture-`. They:
 - Live only in `tests/fixtures/supplier_geometry/`
-- Are rejected by `onboard_production_template.py` by default
+- Are always rejected by the production CLI; no fixture override is exposed
 - Generate a warning during validation
 - Must NEVER be used to promote real production templates
 
@@ -261,3 +275,15 @@ remains stable.
 - Domain models: `core/catalog_models.py`
 - Test fixture: `tests/fixtures/supplier_geometry/test-fixture-hardcase-iphone-17e/`
 - Tests: `tests/test_supplier_geometry.py`
+
+## Current Production Readiness
+
+REAL PRODUCTION TEMPLATE: BLOCKED — SUPPLIER GEOMETRY REQUIRED.
+Synthetic fixtures only prove tooling behavior; they are not supplier evidence.
+Do not promote a real canonical template without genuine supplier geometry and
+owner review. This workflow does not authorize a merge or production deployment.
+
+Before review, run the full `python -m pytest -q` suite, the supplier validator
+on the clearly marked fixture, and the positive publish-mode and different-canvas
+regressions. Confirm canonical templates remain prototype and Contract v1 is
+unchanged. A successful fixture validator result is not production approval.

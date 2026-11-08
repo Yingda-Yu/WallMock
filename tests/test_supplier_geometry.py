@@ -1187,54 +1187,15 @@ class TestBlocker4AtomicPromotion:
     - Original bytes are identical before/after a failed promotion
     """
 
-    def test_failed_promotion_preserves_original_template(self, tmp_path, valid_package_dir):
-        """If staged template fails validation, original template bytes are unchanged."""
+    def test_preflight_failure_preserves_original_template(self, tmp_path, valid_package_dir):
+        """Invalid packages fail before staging and leave original bytes unchanged."""
         tpl_dir = _make_temp_template_dir(tmp_path)
         templates_root = str(Path(tmp_path) / "templates")
 
         # Compute hash of original template directory
         original_hash = _dir_hash(tpl_dir)
 
-        # To trigger a staged validation failure, we need to make the
-        # supplier package produce an invalid template. One way: make
-        # the supplier package have layers that produce an invalid template.
-        # But actually, the promotion code validates the package first,
-        # so we need a different approach.
-        #
-        # Instead, let's corrupt the staging by monkeypatching...
-        # Actually, a simpler approach: verify that when promotion fails
-        # at the staged validation step, the original is untouched.
-        #
-        # The easiest way to trigger staged validation failure:
-        # Make the package's normalized layers produce a template
-        # that fails load_case_template. But the package is validated
-        # before promotion, so this is hard.
-        #
-        # A better test: we can verify the atomicity by checking that
-        # the template dir is byte-identical when we try to promote
-        # with a package that, while valid, produces a template that
-        # somehow fails final validation.
-        #
-        # Actually the simplest approach: test that when we promote
-        # successfully, the backup/restore machinery works by
-        # checking that _dir_hash changes from prototype to production
-        # (promotion succeeded and changed files).
-        #
-        # And test that when promotion can't even start (invalid package),
-        # the template is untouched.
-        #
-        # For a real staged-validation failure test, we need to cause
-        # the staged template to fail load_case_template(). Since the
-        # supplier package is validated before promotion, and promotion
-        # builds a valid template, this is hard to trigger naturally.
-        #
-        # Let's test the atomicity guarantee by:
-        # 1. Computing hash before
-        # 2. Attempting promotion with an invalid package (fails early)
-        # 3. Verifying hash is identical
-
-        # First test: invalid package (fails before any file changes)
-        # Tamper with the package to make it invalid
+        # Preflight guard; actual staging/replace failures are tested below.
         pkg_json_path = os.path.join(valid_package_dir, "package.json")
         with open(pkg_json_path, "r") as f:
             pkg_data = json.load(f)
@@ -1419,30 +1380,20 @@ class TestBlocker6ProvenanceAccuracy:
         # It should preserve the original (official spec) text
         assert promoted.provenance.verified_device_dimensions == original_verified
 
-    def test_dieline_source_claims_supplier_verified_dims(
-        self, tmp_path, valid_package_dir, valid_package_data
+    @pytest.mark.parametrize("source_type", ["dieline", "cad_export", "psd_export", "measured", "normalized_export"])
+    def test_source_format_alone_preserves_device_claims(
+        self, tmp_path, valid_package_dir, valid_package_data, source_type
     ):
-        """Promotion from 'dieline' source DOES claim supplier-verified device dims."""
-        valid_package_data["source_type"] = "dieline"
+        valid_package_data["source_type"] = source_type
         _write_package(valid_package_dir, valid_package_data)
-
         tpl_dir = _make_temp_template_dir(tmp_path)
-        templates_root = str(Path(tmp_path) / "templates")
-
-        result = promote_template(
-            valid_package_dir,
-            templates_root=templates_root,
-            allow_fixture=True,
-        )
-        assert result.success
-
-        promoted = load_case_template(os.path.join(tpl_dir, "template.json"))
-
-        # dieline is a device-dimension-verifying source
-        assert "supplier" in promoted.provenance.verified_device_dimensions.lower(), (
-            f"dieline source should claim supplier-verified device dimensions. "
-            f"Got: '{promoted.provenance.verified_device_dimensions}'"
-        )
+        original = load_case_template(os.path.join(tpl_dir, "template.json")).provenance
+        result = promote_template(valid_package_dir,
+            templates_root=str(tmp_path / "templates"), allow_fixture=True)
+        assert result.success, result.errors
+        promoted = load_case_template(os.path.join(tpl_dir, "template.json")).provenance
+        assert promoted.verified_device_dimensions == original.verified_device_dimensions
+        assert promoted.estimated_device_anchors == original.estimated_device_anchors
 
     def test_supplier_geometry_reference_is_precise(
         self, tmp_path, valid_package_dir
@@ -1465,3 +1416,95 @@ class TestBlocker6ProvenanceAccuracy:
 def _project_root_for_tests():
     """Return the project root directory for subprocess calls."""
     return Path(__file__).resolve().parent.parent
+
+class TestReviewRound3Safety:
+    def test_different_canvas_omitted_optional_layers_render(
+        self, tmp_path, valid_package_dir, valid_package_data
+    ):
+        from core.case_renderer import render_case
+        tpl_dir = Path(_make_temp_template_dir(tmp_path))
+        data = valid_package_data
+        data['normalized_layers'] = [x for x in data['normalized_layers']
+                                     if x['role'] not in ('highlight', 'shadow')]
+        for layer in data['normalized_layers']:
+            p = Path(valid_package_dir) / 'normalized' / layer['file']
+            with Image.open(p) as image:
+                resized = image.resize((800, 1000))
+            resized.save(p)
+            layer['sha256'] = _sha256_file(p)
+        g = data['normalized_geometry']
+        g['canvas'].update(width=800, height=1000)
+        g['print_region'] = dict(x=100, y=40, width=600, height=900)
+        g['camera_region'] = dict(x=100, y=100, width=100, height=100)
+        _write_package(valid_package_dir, data)
+        result = promote_template(valid_package_dir,
+            templates_root=str(tmp_path / 'templates'), allow_fixture=True)
+        assert result.success, result.errors
+        for name in ('highlight.png', 'shadow.png'):
+            assert not (tpl_dir / name).exists()
+        template = load_case_template(str(tpl_dir / 'template.json'))
+        assert {layer.type for layer in template.layers} == {'base', 'artwork', 'overlay'}
+        rendered = render_case(Image.new('RGBA', (200, 300), 'red'), template,
+                               template_dir=str(tpl_dir))
+        assert rendered.size == (800, 1000)
+
+    @pytest.mark.parametrize('failure', ['staged_validation', 'final_move', 'raster_size', 'missing_raster'])
+    def test_failure_after_staging_preserves_original(
+        self, tmp_path, valid_package_dir, monkeypatch, failure
+    ):
+        import scripts.onboard_production_template as onboarding
+        tpl_dir = Path(_make_temp_template_dir(tmp_path))
+        before = _dir_hash(tpl_dir)
+        reached = []
+        if failure == 'staged_validation':
+            original = onboarding.load_case_template
+            def fail_staged(path):
+                if '.promote_staging_' in str(path):
+                    assert json.loads(Path(path).read_text())['status'] == 'production'
+                    reached.append(True)
+                    raise CatalogValidationError('injected staged validation failure')
+                return original(path)
+            monkeypatch.setattr(onboarding, 'load_case_template', fail_staged)
+        elif failure == 'final_move':
+            original = onboarding.shutil.move
+            def fail_move(src, dst, *args, **kwargs):
+                if '.promote_staging_' in str(src) and Path(dst) == tpl_dir:
+                    reached.append(True)
+                    raise OSError('injected final move failure')
+                return original(src, dst, *args, **kwargs)
+            monkeypatch.setattr(onboarding.shutil, 'move', fail_move)
+        else:
+            original = onboarding._apply_promotion_changes
+            def corrupt_staged(directory, *args):
+                original(directory, *args)
+                reached.append(True)
+                if failure == 'raster_size':
+                    Image.new('RGBA', (10, 10)).save(directory / 'base.png')
+                else:
+                    (directory / 'overlay.png').unlink()
+            monkeypatch.setattr(onboarding, '_apply_promotion_changes', corrupt_staged)
+        result = promote_template(valid_package_dir,
+            templates_root=str(tmp_path / 'templates'), allow_fixture=True)
+        assert reached
+        assert not result.success
+        assert _dir_hash(tpl_dir) == before
+        assert not list(tpl_dir.parent.glob('.promote_*'))
+
+
+@pytest.mark.parametrize("change", ["relative_layer_path", "null_mask"])
+def test_promotion_accepts_valid_prototype_references(tmp_path, valid_package_dir, change):
+    tpl_dir = Path(_make_temp_template_dir(tmp_path))
+    p = tpl_dir / 'template.json'
+    data = json.loads(p.read_text())
+    if change == 'relative_layer_path':
+        for layer in data['layers']:
+            if layer.get('file'):
+                layer['file'] = './' + layer['file']
+    else:
+        data['print_region']['mask'] = None
+    p.write_text(json.dumps(data))
+    load_case_template(str(p))
+    result = promote_template(valid_package_dir,
+        templates_root=str(tmp_path / 'templates'), allow_fixture=True)
+    assert result.success, result.errors
+    assert (tpl_dir / 'base.png').exists()
