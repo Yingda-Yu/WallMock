@@ -1,0 +1,5 @@
+# Keep hashed synthetic fixture source bytes identical on all platforms.
+tests/fixtures/supplier_geometry/**/source/*.svg text eol=lf
+tests/fixtures/supplier_geometry/**/source/*.txt text eol=lf
+# Keep the checked-in example bundle artifact hashes cross-platform stable.
+examples/storefront-contract/*.json text eol=lf
